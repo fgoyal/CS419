@@ -33,13 +33,13 @@ const vec3 direction = vec3(0, 0, -1);
 const sphere s1 = sphere(point3(0, 0, -1), 0.5, get_random_color());
 const sphere s2 = sphere(point3(-1, 0, -1), 0.5, get_random_color());
 
-const plane p = plane(point3(0, 0.5, -1), vec3(0, -1, 0));
+const plane p = plane(point3(0, 0.5, -1), vec3(0, -1, 0), color(14, 153, 39)/255.0);
 
-const vec3 a_1 = vec3(1, 0.5, -1);
-const vec3 b_1 = vec3(0.3, 0.5, -0.5);
-const vec3 c_1 = vec3(0, -0.5, -0.5);
+const vec3 a_1 = vec3(0.75, 0.5, -0.8);
+const vec3 b_1 = vec3(0.25, 0.5, -0.5);
+const vec3 c_1 = vec3(0, -0.5, -0.8);
 
-const triangle t1 = triangle(a_1, b_1, c_1);
+const triangle t1 = triangle(a_1, b_1, c_1, get_random_color());
 
 // ----------------- PHONG REFLECTION MODEL --------------------- //
 const vec3 lightPosition = vec3(0.5, -1, 1);
@@ -62,7 +62,13 @@ color phong_reflection(vec3 N, point3 position, vec3 kDiffuse) {
 
 color ray_color(const ray& r) {
     hit_record rec;
-    double hit = s1.ray_intersection(r, rec);
+    double hit = t1.ray_intersection(r, rec);
+    if (hit >= 0.0) {
+        // return color(1, 1, 1);
+        // std::cerr << t1.normal() << "\n";
+        return phong_reflection(t1.normal(), r.at(hit), t1.kDiffuse());
+    }
+    hit = s1.ray_intersection(r, rec);
     if (hit >= 0.0) {
         point3 position = r.at(hit);
         vec3 N = s1.surface_normal(position);
@@ -74,17 +80,11 @@ color ray_color(const ray& r) {
         vec3 N = s2.surface_normal(position);
         return phong_reflection(N, position, s2.kDiffuse());
     }
-    hit = t1.ray_intersection(r, rec);
-    if (hit >= 0.0) {
-        // return color(1, 1, 1);
-        // std::cerr << t1.normal() << "\n";
-        return phong_reflection(t1.normal(), r.at(hit), color(1,1,1));
-    }
     hit = p.ray_intersection(r, rec);
     if (hit >= 0.0) {
         // std::cerr << r.at(hit) << "\n";
-        return color(14, 153, 39)/255.0;
-        // return phong_reflection(p.normal(), r.at(hit), color(14, 153, 39)/255.0);
+        // return color(14, 153, 39)/255.0;
+        return phong_reflection(p.normal(), r.at(hit), p.kDiffuse());
     }
 
     vec3 unit_direction = unit_vector(r.direction());

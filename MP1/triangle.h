@@ -7,7 +7,7 @@
 
 class triangle : public objs {
     public: 
-        triangle(const vec3& a_t, const vec3& b_t, const vec3& c_t) : a(a_t), b(b_t), c(c_t) {}
+        triangle(const vec3& a_t, const vec3& b_t, const vec3& c_t, const color& kDiffuse) : a(a_t), b(b_t), c(c_t), kD(kDiffuse) {}
         
         vec3 a_t() const {
             return a;
@@ -19,6 +19,10 @@ class triangle : public objs {
 
         vec3 c_t() const {
             return c;
+        }
+
+        color kDiffuse() const {
+            return kD;
         }
 
         vec3 normal() const {
@@ -34,6 +38,7 @@ class triangle : public objs {
         point3 b;
         point3 c;
         vec3 n;
+        color kD;
 };
 
 double triangle::ray_intersection(const ray& r, hit_record& rec) const {

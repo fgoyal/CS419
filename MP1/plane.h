@@ -10,7 +10,7 @@ using std::sqrt;
 
 class plane : public objs {
     public: 
-        plane(const point3& point, const vec3& normal) : a(point), n(normal) {}
+        plane(const point3& point, const vec3& normal, const color& kDiffuse) : a(point), n(normal), kD(kDiffuse) {}
         
         point3 point() const {
             return a;
@@ -20,11 +20,16 @@ class plane : public objs {
             return n;
         }
 
+        color kDiffuse() const {
+            return kD;
+        }
+
         virtual double ray_intersection(const ray& r, hit_record& rec) const;
 
     public:
         point3 a;
         vec3 n;
+        color kD;
 };
 
 double plane::ray_intersection(const ray& r, hit_record& rec) const {

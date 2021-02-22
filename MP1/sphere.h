@@ -4,13 +4,12 @@
 #include "objs.h"
 #include "vec3.h"
 #include "ray.h"
-#include <iostream>
 
 using std::sqrt;
 
 class sphere : public objs {
     public: 
-        sphere(const point3& center, const double radius, const vec3 kDiffuse) : c(center), rad(radius), kD(kDiffuse) {}
+        sphere(const point3& center, const double radius, const color& kDiffuse) : c(center), rad(radius), kD(kDiffuse) {}
         point3 center() const {
             return c;
         }
@@ -19,7 +18,7 @@ class sphere : public objs {
             return rad;
         }
 
-        vec3 kDiffuse() const {
+        color kDiffuse() const {
             return kD;
         }
 
