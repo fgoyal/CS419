@@ -9,6 +9,12 @@ using std::sqrt;
 
 class sphere : public objs {
     public: 
+        /** 
+         * Constructor for a Sphere
+         * @param center the center point of the sphere
+         * @param radius the radius for the sphere
+         * @param kDiffuse the kDiffuse element for the Phong shading model
+         */
         sphere(const point3& center, const double radius, const color& kDiffuse) : c(center), rad(radius), kD(kDiffuse) {}
         point3 center() const {
             return c;

@@ -7,6 +7,11 @@
 
 class triangle : public objs {
     public: 
+        /** 
+         * Constructor for a Triangle
+         * @param a_t, b_t, c_t: the three edge points of the triangle
+         * @param kDiffuse the kDiffuse element for the Phong shading model
+         */
         triangle(const vec3& a_t, const vec3& b_t, const vec3& c_t, const color& kDiffuse) : a(a_t), b(b_t), c(c_t), kD(kDiffuse) {}
         
         vec3 a_t() const {
@@ -21,11 +26,6 @@ class triangle : public objs {
             return c;
         }
 
-        // vec3 normal() const {
-        //     vec3 e1 = c - b;
-        //     vec3 e2 = a - c;
-        //     return unit_vector(cross(e1, e2));
-        // }
         virtual color kDiffuse() const;
         virtual vec3 surface_normal(const point3 position) const;
         virtual double ray_intersection(const ray& r, hit_record& rec) const;
@@ -34,7 +34,6 @@ class triangle : public objs {
         point3 a;
         point3 b;
         point3 c;
-        vec3 n;
         color kD;
 };
 
@@ -49,7 +48,6 @@ vec3 triangle::surface_normal(const point3 position) const {
 }
 
 double triangle::ray_intersection(const ray& r, hit_record& rec) const {
-    // double t = dot((a - r.origin()), n) / dot(r.direction(), n);
     vec3 N = surface_normal(point3(0.0,0.0,0.0));
     double nraydir = dot(N, r.direction());
     if (abs(nraydir) < 0.0001) {

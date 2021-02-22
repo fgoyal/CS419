@@ -5,6 +5,7 @@
 #include <iostream>
 
 using std::sqrt;
+using std::ostream;
 
 class vec3 {
     public: 
@@ -73,7 +74,7 @@ using color = vec3;
 
 // vec3 Utility Functions
 
-inline std::ostream& operator<<(std::ostream &out, const vec3 &v) {
+inline ostream& operator<<(ostream &out, const vec3 &v) {
     return out << v.e[0] << ' ' << v.e[1] << ' ' << v.e[2];
 }
 

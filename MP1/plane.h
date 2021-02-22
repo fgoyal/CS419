@@ -9,6 +9,12 @@ using std::sqrt;
 
 class plane : public objs {
     public: 
+        /** 
+         * Constructor for a Plane
+         * @param point any point that appears on the plane
+         * @param normal the surface normal for the plane
+         * @param kDiffuse the kDiffuse element for the Phong shading model
+         */
         plane(const point3& point, const vec3& normal, const color& kDiffuse) : a(point), n(normal), kD(kDiffuse) {}
         
         point3 point() const {
@@ -24,6 +30,7 @@ class plane : public objs {
         vec3 n;
         color kD;
 };
+
 color plane::kDiffuse() const {
     return kD;
 }
