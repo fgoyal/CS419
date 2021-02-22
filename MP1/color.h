@@ -17,4 +17,8 @@ color get_random_color() {
     return color(random_double(), random_double(), random_double());
 }
 
+color shade(color pixel_color, double factor) {
+    return pixel_color * factor;
+}
+
 #endif

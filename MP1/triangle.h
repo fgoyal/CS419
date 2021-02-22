@@ -50,7 +50,7 @@ vec3 triangle::surface_normal(const point3 position) const {
 
 double triangle::ray_intersection(const ray& r, hit_record& rec) const {
     // double t = dot((a - r.origin()), n) / dot(r.direction(), n);
-    vec3 N = surface_normal(point3(0,0,0));
+    vec3 N = surface_normal(point3(0.0,0.0,0.0));
     double nraydir = dot(N, r.direction());
     if (abs(nraydir) < 0.0001) {
         return -1;

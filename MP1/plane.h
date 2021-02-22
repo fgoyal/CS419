@@ -4,7 +4,6 @@
 #include "objs.h"
 #include "vec3.h"
 #include "ray.h"
-#include <iostream>
 
 using std::sqrt;
 
@@ -15,10 +14,6 @@ class plane : public objs {
         point3 point() const {
             return a;
         }
-
-        // vec3 normal() const {
-        //     return n;
-        // }
 
         virtual color kDiffuse() const;
         virtual vec3 surface_normal(const point3 position) const;

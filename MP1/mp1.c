@@ -13,7 +13,7 @@ static bool perspective = false;
 
 // Image
 const static double aspect_ratio = 1.5 / 1.0;
-const static int image_width = 500;
+const static int image_width = 750;
 const static int image_height = static_cast<int>(image_width / aspect_ratio);
 
 // Camera
@@ -31,36 +31,68 @@ const vec3 lower_left_corner = origin - horizontal/2 - vertical/2 - vec3(0, 0, f
 const float s = viewport_width / image_width;
 const vec3 direction = vec3(0, 0, -1);
 
-// Shapes
-const sphere s1 = sphere(point3(0, 0, -1), 0.5, color(91,75,122)/255.0);
-const sphere s2 = sphere(point3(-1, 0.2, -1), 0.3, color(193,3,55)/255.0);
+// Colors
+const color s1_c = color(91,75,122)/255.0;
+const color s2_c = color(193,3,55)/255.0;
+const color t1_c = color(0.0470446,0.678865,0.679296);
+const color p_c = color(14, 153, 39)/255.0;
+const color sky = color(0.5, 0.7, 1.0);
 
-const plane p = plane(point3(0, 0.5, -1), vec3(0, -1, 0), color(14, 153, 39)/255.0);
+// Objects
+const sphere s1 = sphere(point3(0, 0, -1), 0.5, s1_c);
+const sphere s2 = sphere(point3(-1, 0.2, -1), 0.3, s2_c);
 
-const vec3 a_1 = vec3(0.75, 0.5, -0.8);
-const vec3 b_1 = vec3(0.25, 0.5, -0.5);
-const vec3 c_1 = vec3(0, -0.5, -0.8);
+const plane p = plane(point3(0, 0.5, -1), vec3(0, -1, 0), p_c);
 
-const triangle t1 = triangle(a_1, b_1, c_1, color(0.0470446,0.678865,0.679296));
+const vec3 a_1 = vec3(1, 0.5, -0.8);
+const vec3 b_1 = vec3(0, 0.5, -0.5);
+const vec3 c_1 = vec3(0.25, -0.5, -0.8);
+
+const triangle t1 = triangle(a_1, b_1, c_1, t1_c);
 
 std::vector<const objs*> objects;
 // ----------------- PHONG REFLECTION MODEL --------------------- //
-const vec3 lightPosition = vec3(0.5, -1, 1);
+const vec3 lightPosition = vec3(0.75, -0.75, 0.3);
 
 // Ambient Lighting
 const vec3 kAmbient = vec3(1, 1, 1);
 const vec3 iAmbient = vec3(0,0,0);
 
 // Diffuse Lighting
-const vec3 iDiffuse = vec3(1, 1, 1);
+const vec3 iDiffuse = vec3(1,1,1);
+const vec3 iDiffuse_shadow = vec3(0.5, 0.5, 0.5);
 
-color phong_reflection(vec3 N, point3 position, vec3 kDiffuse) {
+color phong_reflection(vec3 N, point3 position, vec3 kDiffuse, bool shadow) {
     vec3 L = unit_vector(lightPosition - position); // light vector
     double diffuseLight = fmax(dot(L, N), 0.0);
     
     vec3 ambient = kAmbient * iAmbient;
-    vec3 diffuse = kDiffuse * diffuseLight * iDiffuse;
+    vec3 diffuse = kDiffuse * diffuseLight;
+    if (shadow) {
+        diffuse = diffuse * iDiffuse_shadow;
+    } else {
+        diffuse = diffuse * iDiffuse;
+    }
     return ambient + diffuse;
+}
+
+bool in_shadow(hit_record rec) {
+    ray shadow_ray = ray(rec.p, lightPosition - rec.p);
+    hit_record tmp;
+    double hit; 
+    int i = 0;
+    for (auto o : objects) {
+        if (i == 3) {
+            break;
+        }
+        hit = o->ray_intersection(shadow_ray, tmp);
+        if (hit >= 0.0) {
+            return true;
+            // return color(1,0,0);
+        }
+        i++;
+    }
+    return false;
 }
 
 color ray_color(const ray& r) {
@@ -79,13 +111,19 @@ color ray_color(const ray& r) {
         }
     }
 
+    color to_return;
+
     if (hit_object) {
-        return phong_reflection(rec.normal, rec.p, rec.kD);
-    }
-    
-    vec3 unit_direction = unit_vector(r.direction());
-    hit = 0.5 * (unit_direction.y() + 1.0);
-    return (1.0 - hit) * color(1.0, 1.0, 1.0) + hit * color(0.5, 0.7, 1.0);
+        // bool shadow = in_shadow(rec);
+        to_return = phong_reflection(rec.normal, rec.p, rec.kD, in_shadow(rec));
+        // to_return = apply_shadows(to_return, rec);
+        return to_return;
+    } 
+
+    // vec3 unit_direction = unit_vector(r.direction());
+    // hit = 0.5 * (unit_direction.y() + 1.0);
+    // return (1.0 - hit) * color(1.0, 1.0, 1.0) + hit * sky;
+    return sky;
 }
 
 ray get_ray_perspective(int i, int j) {
