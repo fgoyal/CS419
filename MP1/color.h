@@ -3,6 +3,7 @@
 
 #include "vec3.h"
 #include "utils.h"
+#include <vector>
 
 #include <iostream>
 
@@ -19,6 +20,14 @@ color get_random_color() {
 
 color shade(color pixel_color, double factor) {
     return pixel_color * factor;
+}
+
+color get_average_color(std::vector<color> &vect) {
+    color avg = color(0, 0, 0);
+    for (auto c : vect) {
+        avg += c;
+    }
+    return avg / vect.size();
 }
 
 #endif

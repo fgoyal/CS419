@@ -13,7 +13,7 @@ static bool perspective = false;
 
 // Image
 const static double aspect_ratio = 1.5 / 1.0;
-const static int image_width = 750;
+const static int image_width = 500;
 const static int image_height = static_cast<int>(image_width / aspect_ratio);
 
 // Camera
@@ -39,20 +39,20 @@ const color p_c = color(14, 153, 39)/255.0;
 const color sky = color(0.5, 0.7, 1.0);
 
 // Objects
-const sphere s1 = sphere(point3(0, 0, -1), 0.5, s1_c);
-const sphere s2 = sphere(point3(-1, 0.2, -1), 0.3, s2_c);
+const sphere s1 = sphere(point3(0, 0, -1), 0.4, s1_c);
+const sphere s2 = sphere(point3(1, 0, -1), 0.3, s2_c);
 
 const plane p = plane(point3(0, 0.5, -1), vec3(0, -1, 0), p_c);
 
 const vec3 a_1 = vec3(1, 0.5, -0.8);
-const vec3 b_1 = vec3(0, 0.5, -0.5);
+const vec3 b_1 = vec3(0.25, 0.5, -0.5);
 const vec3 c_1 = vec3(0.25, -0.5, -0.8);
 
 const triangle t1 = triangle(a_1, b_1, c_1, t1_c);
 
 std::vector<const objs*> objects;
 // ----------------- PHONG REFLECTION MODEL --------------------- //
-const vec3 lightPosition = vec3(0.75, -0.75, 0.3);
+const vec3 lightPosition = vec3(0.75, -0.75, -0.3);
 
 // Ambient Lighting
 const vec3 kAmbient = vec3(1, 1, 1);
@@ -60,25 +60,21 @@ const vec3 iAmbient = vec3(0,0,0);
 
 // Diffuse Lighting
 const vec3 iDiffuse = vec3(1,1,1);
-const vec3 iDiffuse_shadow = vec3(0.5, 0.5, 0.5);
+// const vec3 iDiffuse_shadow = vec3(0.5, 0.5, 0.5);
 
-color phong_reflection(vec3 N, point3 position, vec3 kDiffuse, bool shadow) {
+color phong_reflection(vec3 N, point3 position, vec3 kDiffuse) {
     vec3 L = unit_vector(lightPosition - position); // light vector
     double diffuseLight = fmax(dot(L, N), 0.0);
     
     vec3 ambient = kAmbient * iAmbient;
-    vec3 diffuse = kDiffuse * diffuseLight;
-    if (shadow) {
-        diffuse = diffuse * iDiffuse_shadow;
-    } else {
-        diffuse = diffuse * iDiffuse;
-    }
+    vec3 diffuse = kDiffuse * diffuseLight * iDiffuse;
     return ambient + diffuse;
 }
 
-bool in_shadow(hit_record rec) {
+color apply_shadows(color original, hit_record rec) {
     ray shadow_ray = ray(rec.p, lightPosition - rec.p);
     hit_record tmp;
+    color shadow = original;
     double hit; 
     int i = 0;
     for (auto o : objects) {
@@ -87,12 +83,12 @@ bool in_shadow(hit_record rec) {
         }
         hit = o->ray_intersection(shadow_ray, tmp);
         if (hit >= 0.0) {
-            return true;
-            // return color(1,0,0);
+            shadow = shade(shadow, 0.4);
         }
         i++;
     }
-    return false;
+    // std::cerr << "no hit\n";
+    return shadow;
 }
 
 color ray_color(const ray& r) {
@@ -101,22 +97,27 @@ color ray_color(const ray& r) {
     double hit;
     bool hit_object = false;
     double closest = std::numeric_limits<double>::infinity();
-
+    bool sphere1 = false;
+    int i = 0;
     for (auto o : objects) {
         hit = o->ray_intersection(r, tmp);
         if (hit >= 0.0 && hit <= closest) {
             hit_object = true;
             closest = tmp.t;
             rec = tmp;
+            if (i == 0) {
+                sphere1 = true;
+            }
         }
+        i++;
     }
 
     color to_return;
 
     if (hit_object) {
         // bool shadow = in_shadow(rec);
-        to_return = phong_reflection(rec.normal, rec.p, rec.kD, in_shadow(rec));
-        // to_return = apply_shadows(to_return, rec);
+        to_return = phong_reflection(rec.normal, rec.p, rec.kD);
+        to_return = apply_shadows(to_return, rec);
         return to_return;
     } 
 
@@ -126,20 +127,10 @@ color ray_color(const ray& r) {
     return sky;
 }
 
-ray get_ray_perspective(int i, int j) {
-    double u = double(i) / (image_width - 1);
-    double v = double(j) / (image_height - 1);
-    vec3 pixel_center = lower_left_corner + u * horizontal + v * vertical;
-    // std::cerr << pixel_center << "\n";
-    return ray(origin, pixel_center - origin);
-}
-
-ray get_ray_orthographic(int i, int j) {
+vec3 get_pixel_center(int i, int j) {
     double x = s * (i - image_width / 2 + 0.5);
     double y = s * (j - image_height / 2 + 0.5);
-    vec3 pixel_center = vec3(x, y, 0);
-    // std::cerr << pixel_center << "\n";
-    return ray(pixel_center, direction);
+    return vec3(x, y, 0);
 }
 
 void add_objects() {
@@ -156,16 +147,22 @@ int main(int argc, char* argv[]) {
         }
     }
     add_objects();
+    // std::vector<color> pixel;
+    // pixel.push_back(color(0,0,0));
+    // pixel.push_back(color(1,1,1));
+    // pixel.push_back(color(1,1,0));
+    // std::cerr << get_average_color(pixel) << "\n";
     std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
     for (int j = 0; j < image_height; ++j) {
         std::cerr << "\rScanlines done: " << j << ' ' << std::flush;
         for (int i = 0; i < image_width; ++i) {
             // std::cerr << "(i, j) = " << i << " " << j << "\n";
             ray r;
+            vec3 pixel_center = get_pixel_center(i, j);
             if (perspective) {
-                r = get_ray_perspective(i, j);
+                r = ray(origin, pixel_center - origin - vec3(0, 0, focal_length));
             } else {
-                r = get_ray_orthographic(i, j);
+                r = ray(pixel_center, direction);
             }
             color pixel_color = ray_color(r);
             write_color(std::cout, pixel_color);
