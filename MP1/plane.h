@@ -29,15 +29,15 @@ color plane::kDiffuse() const {
 }
 
 vec3 plane::surface_normal(const point3 position) const {
-    return n;
+    return unit_vector(n);
 }
 
 double plane::ray_intersection(const ray& r, hit_record& rec) const {
-    double t = dot((a - r.origin()), n) / dot(r.direction(), n);
+    double t = dot((a - r.origin()), unit_vector(n)) / dot(r.direction(), unit_vector(n));
 
     rec.t = t;
     rec.p = r.at(t);
-    rec.set_normal(r, n);
+    rec.set_normal(r, unit_vector(n));
     rec.kD = kD;
     return t;
 }

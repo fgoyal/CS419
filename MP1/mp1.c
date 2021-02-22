@@ -9,25 +9,23 @@
 #include <vector>
 #include <limits>
 
+// ----------------- VARIABLES --------------------- //
 static bool perspective = false;
+static bool jittering = true;
+static const int fine_grid = 4;
+static int coarse_grid = (int) sqrt(fine_grid);
 
 // Image
-const static double aspect_ratio = 1.5 / 1.0;
-const static int image_width = 500;
+const static double aspect_ratio = 1.0 / 1.0;
+const static int image_width = 400;
 const static int image_height = static_cast<int>(image_width / aspect_ratio);
 
 // Camera
 const float viewport_width = 4.0;
 const float viewport_height = viewport_width / aspect_ratio;
 const float focal_length = 1.0;
-
-// Perspective
 const point3 origin = point3(0,0,0);
-const vec3 horizontal = vec3(viewport_width, 0, 0);
-const vec3 vertical = vec3(0, viewport_height, 0);
-const vec3 lower_left_corner = origin - horizontal/2 - vertical/2 - vec3(0, 0, focal_length);
 
-// Orthographic
 const float s = viewport_width / image_width;
 const vec3 direction = vec3(0, 0, -1);
 
@@ -40,9 +38,9 @@ const color sky = color(0.5, 0.7, 1.0);
 
 // Objects
 const sphere s1 = sphere(point3(0, 0, -1), 0.4, s1_c);
-const sphere s2 = sphere(point3(1, 0, -1), 0.3, s2_c);
+const sphere s2 = sphere(point3(0, -1, -1), 0.3, s2_c);
 
-const plane p = plane(point3(0, 0.5, -1), vec3(0, -1, 0), p_c);
+const plane p = plane(point3(0, 0.5, -1), vec3(0, -0.5, 0.5), p_c);
 
 const vec3 a_1 = vec3(1, 0.5, -0.8);
 const vec3 b_1 = vec3(0.25, 0.5, -0.5);
@@ -52,7 +50,7 @@ const triangle t1 = triangle(a_1, b_1, c_1, t1_c);
 
 std::vector<const objs*> objects;
 // ----------------- PHONG REFLECTION MODEL --------------------- //
-const vec3 lightPosition = vec3(0.75, -0.75, -0.3);
+const vec3 lightPosition = vec3(0.75, -0.75, 0.5);
 
 // Ambient Lighting
 const vec3 kAmbient = vec3(1, 1, 1);
@@ -61,6 +59,9 @@ const vec3 iAmbient = vec3(0,0,0);
 // Diffuse Lighting
 const vec3 iDiffuse = vec3(1,1,1);
 // const vec3 iDiffuse_shadow = vec3(0.5, 0.5, 0.5);
+
+
+// ----------------- FUNCTIONS --------------------- //
 
 color phong_reflection(vec3 N, point3 position, vec3 kDiffuse) {
     vec3 L = unit_vector(lightPosition - position); // light vector
@@ -72,6 +73,7 @@ color phong_reflection(vec3 N, point3 position, vec3 kDiffuse) {
 }
 
 color apply_shadows(color original, hit_record rec) {
+    float e = 0.00001;
     ray shadow_ray = ray(rec.p, lightPosition - rec.p);
     hit_record tmp;
     color shadow = original;
@@ -133,14 +135,21 @@ vec3 get_pixel_center(int i, int j) {
     return vec3(x, y, 0);
 }
 
+vec3 get_grid_pixel_center(int i, int j, int k, int l) {
+    double x = s * (i + k - image_width / 2 + 0.5) / fine_grid;
+    double y = s * (j + l - image_height / 2 + 0.5) / fine_grid;
+    return vec3(x, y, 0);
+}
+
 void add_objects() {
+    objects.push_back(&t1);
     objects.push_back(&s1);
     objects.push_back(&s2);
-    objects.push_back(&t1);
     objects.push_back(&p);
 }
 
 int main(int argc, char* argv[]) {
+    srand(time(0));
     if (argc > 1) {
         if (!std::string(argv[1]).compare("-p")) {
             perspective = true;
@@ -152,20 +161,63 @@ int main(int argc, char* argv[]) {
     // pixel.push_back(color(1,1,1));
     // pixel.push_back(color(1,1,0));
     // std::cerr << get_average_color(pixel) << "\n";
+    // std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
+    // if (jittering) {
+    //     bool sample[fine_grid][fine_grid] = {false};
+    //     sample[0][1] = true;
+    //     sample[15][3] = true;
+    //     for (int j = 0; j < image_height; ++j) {
+    //         std::cerr << "\rScanlines done: " << j << ' ' << std::flush;
+    //         for (int i = 0; i < image_width; ++i) {
+    //             std::cerr << random_int(0, fine_grid) << "\n";
+    //             if (sample[i][j]) {
+    //                 write_color(std::cout, color(0,0,0));
+    //             } else {
+    //                 write_color(std::cout, color(1,1,1));
+    //             }
+    //             // write_color(std::cout, color(sample[i][j], sample[i][j], sample[i][j]));
+    //         }
+    //     }
+    // }
+
     std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
     for (int j = 0; j < image_height; ++j) {
         std::cerr << "\rScanlines done: " << j << ' ' << std::flush;
         for (int i = 0; i < image_width; ++i) {
-            // std::cerr << "(i, j) = " << i << " " << j << "\n";
-            ray r;
-            vec3 pixel_center = get_pixel_center(i, j);
-            if (perspective) {
-                r = ray(origin, pixel_center - origin - vec3(0, 0, focal_length));
+            if (jittering) {
+            //     bool sample[fine_grid][fine_grid] = {false};
+                std::vector<color> pixel;
+                for (int k = 0; k < fine_grid; k++) {
+                    for (int l = 0; l < fine_grid; l++) {
+                        vec3 grid_center = get_grid_pixel_center(i, j, k, l);
+                        ray r;
+                        if (perspective) {
+                            r = ray(origin, grid_center - origin - vec3(0, 0, focal_length));
+                        } else {
+                            r = ray(grid_center, direction);
+                        }
+                        // std::cerr << grid_center << "\n";
+                        color pixel_color = ray_color(r);
+                        pixel.push_back(pixel_color);
+                        
+                    }
+                }
+                color average = get_average_color(pixel);
+                write_color(std::cout, average);
+                // std::cerr << pixel.size() << "\n";
             } else {
-                r = ray(pixel_center, direction);
+                // std::cerr << "(i, j) = " << i << " " << j << "\n";
+                ray r;
+                vec3 pixel_center = get_pixel_center(i, j);
+                // vec3 grid_center = get_grid_pixel_center(i, j);
+                if (perspective) {
+                    r = ray(origin, pixel_center - origin - vec3(0, 0, focal_length));
+                } else {
+                    r = ray(pixel_center, direction);
+                }
+                color pixel_color = ray_color(r);
+                write_color(std::cout, pixel_color);
             }
-            color pixel_color = ray_color(r);
-            write_color(std::cout, pixel_color);
         }
     }
 
