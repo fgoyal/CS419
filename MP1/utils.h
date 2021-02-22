@@ -44,7 +44,7 @@ inline bool** get_multi_jitter_mask(int fine_size) {
     srand(time(NULL));
     for (int i = 0; i < coarse_size; i++) {
         for (int j = 0; j < coarse_size; j++) {
-            std::cerr << i << " " << j << "\n";
+            // std::cerr << i << " " << j << "\n";
             int x;
             int y;
             do {
@@ -57,7 +57,7 @@ inline bool** get_multi_jitter_mask(int fine_size) {
             } while (col.count(y) > 0);
             col.insert(std::pair<int,bool>(y,true));
             
-            std::cerr << x << " " << y << "\n\n";
+            // std::cerr << x << " " << y << "\n\n";
             sample[x][y] = true;
         }
     }

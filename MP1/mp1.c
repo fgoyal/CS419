@@ -17,10 +17,11 @@ static bool perspective = false;
 static bool jittering = true;
 static const int fine_grid = 16;
 static int coarse_grid = (int) sqrt(fine_grid);
+// bool** multi_jitter_mask;
 
 // Image
-const static double aspect_ratio = 1.0 / 1.0;
-const static int image_width = 16;
+const static double aspect_ratio = 1.5 / 1.0;
+const static int image_width = 500;
 const static int image_height = static_cast<int>(image_width / aspect_ratio);
 
 // Camera
@@ -162,72 +163,73 @@ int main(int argc, char* argv[]) {
     }
     add_objects();
     std::cerr << "s = " << s << "\n";
-    std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
-
-    srand(time(NULL));
-    // for (int i = 0; i < 10; i++) {
-    //     auto r = random_int(0,4);
-    //     // auto r = rand() % fine_grid;
-    //     std::cerr << r << "\n";
-    // }
-    if (jittering) {
-        bool** sample = get_multi_jitter_mask(fine_grid);
-        
-        for (int j = 0; j < fine_grid; ++j) {
-            std::cerr << "\rScanlines done: " << j << ' ' << std::flush;
-            for (int i = 0; i < fine_grid; ++i) {
-                if (sample[i][j]) {
-                    write_color(std::cout, color(0,0,0));
-                } else {
-                    write_color(std::cout, color(1,1,1));
-                }
-            }
-        }
-    }
-    return 0;
     // std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
-    // for (int j = 0; j < image_height; ++j) {
-    //     // std::cerr << "\rScanlines done: " << j << ' ' << std::flush;
-    //     for (int i = 0; i < image_width; ++i) {
-    //         if (jittering) {
-    //         //     bool sample[fine_grid][fine_grid] = {false};
-    //             std::vector<color> pixel;
-    //             for (int k = 0; k < fine_grid; k++) {
-    //                 for (int l = 0; l < fine_grid; l++) {
-    //                     vec3 grid_center = get_grid_pixel_center(i, j, k, l);
-    //                     ray r;
-    //                     if (perspective) {
-    //                         r = ray(origin, grid_center - origin - vec3(0, 0, focal_length));
-    //                     } else {
-    //                         r = ray(grid_center, direction);
-    //                     }
-    //                     // std::cerr << grid_center << "\n";
-    //                     color pixel_color = ray_color(r);
-    //                     pixel.push_back(pixel_color);
-                        
-    //                 }
-    //             }
-    //             color average = get_average_color(pixel);
-    //             write_color(std::cout, average);
-    //             // std::cerr << pixel.size() << "\n";
-    //         } else {
-    //             // std::cerr << "(i, j) = " << i << " " << j << "\n";
-    //             ray r;
-    //             vec3 pixel_center = get_pixel_center(i, j);
-    //             // std::cerr << pixel_center << "\n";
-    //             // vec3 grid_center = get_grid_pixel_center(i, j);
-    //             if (perspective) {
-    //                 r = ray(origin, pixel_center - origin - vec3(0, 0, focal_length));
+
+    // srand(time(NULL));
+    // // for (int i = 0; i < 10; i++) {
+    // //     auto r = random_int(0,4);
+    // //     // auto r = rand() % fine_grid;
+    // //     std::cerr << r << "\n";
+    // // }
+    // if (jittering) {
+    //     bool** sample = get_multi_jitter_mask(fine_grid);
+        
+    //     for (int j = 0; j < fine_grid; ++j) {
+    //         std::cerr << "\rScanlines done: " << j << ' ' << std::flush;
+    //         for (int i = 0; i < fine_grid; ++i) {
+    //             if (sample[i][j]) {
+    //                 write_color(std::cout, color(0,0,0));
     //             } else {
-    //                 r = ray(pixel_center, direction);
+    //                 write_color(std::cout, color(1,1,1));
     //             }
-    //             color pixel_color = ray_color(r);
-    //             // std::cerr << pixel_color << "\n";
-    //             write_color(std::cout, pixel_color);
     //         }
     //     }
-    //     // std::cerr << "\n";
     // }
+    // return 0;
+    std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
+    for (int j = 0; j < image_height; ++j) {
+        std::cerr << "\rScanlines done: " << j << ' ' << std::flush;
+        for (int i = 0; i < image_width; ++i) {
+            if (jittering) {
+                bool** multi_jitter_mask = get_multi_jitter_mask(fine_grid);
+                std::vector<color> pixel;
+                for (int k = 0; k < fine_grid; k++) {
+                    for (int l = 0; l < fine_grid; l++) {
+                        if (multi_jitter_mask[k][l]) {
+                            vec3 grid_center = get_grid_pixel_center(i, j, k, l);
+                            ray r;
+                            if (perspective) {
+                                r = ray(origin, grid_center - origin - vec3(0, 0, focal_length));
+                            } else {
+                                r = ray(grid_center, direction);
+                            }
+                            // std::cerr << grid_center << "\n";
+                            color pixel_color = ray_color(r);
+                            pixel.push_back(pixel_color);
+                        }
+                    }
+                }
+                color average = get_average_color(pixel);
+                write_color(std::cout, average);
+                // std::cerr << pixel.size() << "\n";
+            } else {
+                // std::cerr << "(i, j) = " << i << " " << j << "\n";
+                ray r;
+                vec3 pixel_center = get_pixel_center(i, j);
+                // std::cerr << pixel_center << "\n";
+                // vec3 grid_center = get_grid_pixel_center(i, j);
+                if (perspective) {
+                    r = ray(origin, pixel_center - origin - vec3(0, 0, focal_length));
+                } else {
+                    r = ray(pixel_center, direction);
+                }
+                color pixel_color = ray_color(r);
+                // std::cerr << pixel_color << "\n";
+                write_color(std::cout, pixel_color);
+            }
+        }
+        // std::cerr << "\n";
+    }
 
-    // std::cerr << "\nDone.\n";
+    std::cerr << "\nDone.\n";
 }
