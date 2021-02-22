@@ -1,7 +1,9 @@
 #include "color.h"
 #include "ray.h"
-#include "sphere.h"
 #include "vec3.h"
+#include "sphere.h"
+#include "plane.h"
+#include "objs.h"
 #include <iostream>
 
 static bool perspective = false;
@@ -30,24 +32,18 @@ const vec3 direction = vec3(0, 0, -1);
 const sphere s1 = sphere(point3(0, 0, -1), 0.5, get_random_color());
 const sphere s2 = sphere(point3(-1, 0, -1), 0.5, get_random_color());
 
-const point3 plane_point = point3(0, 0.1, 0);
-const vec3 plane_normal = vec3(0, -1, 0);
+const plane p = plane(point3(0, 0.1, 0), vec3(0.5, -0.5, 0.5));
+const plane p2 = plane(point3(0, 0.1, 0), vec3(0, -1, 0));
 
 // ----------------- PHONG REFLECTION MODEL --------------------- //
-const vec3 lightPosition = vec3(0.5, -0.5, 0);
+const vec3 lightPosition = vec3(0.5, -1, 1);
 
 // Ambient Lighting
 const vec3 kAmbient = vec3(1, 1, 1);
 const vec3 iAmbient = vec3(0,0,0);
 
 // Diffuse Lighting
-// const vec3 kDiffuse = vec3(255, 230, 0)/255.0;
 const vec3 iDiffuse = vec3(1, 1, 1);
-
-double plane_intersection(const point3& a, const vec3& n, const ray& r) {
-    auto t = dot((a - r.origin()), n) / dot(r.direction(), n);
-    return t;
-}
 
 color phong_reflection(vec3 N, point3 position, vec3 kDiffuse) {
     vec3 L = unit_vector(lightPosition - position); // light vector
@@ -59,23 +55,30 @@ color phong_reflection(vec3 N, point3 position, vec3 kDiffuse) {
 }
 
 color ray_color(const ray& r) {
-    double hit = s1.ray_intersection(r);
+    hit_record rec;
+    // double hit = s1.ray_intersection(r, rec);
+    // if (hit >= 0.0) {
+    //     point3 position = r.at(hit);
+    //     vec3 N = s1.surface_normal(position);
+    //     return phong_reflection(N, position, s1.kDiffuse());
+    // }
+    // hit = s2.ray_intersection(r, rec);
+    // if (hit >= 0.0) {
+    //     point3 position = r.at(hit);
+    //     vec3 N = s2.surface_normal(position);
+    //     return phong_reflection(N, position, s2.kDiffuse());
+    // }
+    double hit = p.ray_intersection(r, rec);
     if (hit >= 0.0) {
-        point3 position = r.at(hit);
-        vec3 N = s1.surface_normal(position);
-        return phong_reflection(N, position, s1.kDiffuse());
+        return color(14, 153, 39)/255.0;
+        // return phong_reflection(p.normal(), r.at(hit), color(14, 153, 39)/255.0);
     }
-    hit = s2.ray_intersection(r);
+    hit = p2.ray_intersection(r, rec);
     if (hit >= 0.0) {
-        point3 position = r.at(hit);
-        vec3 N = s2.surface_normal(position);
-        return phong_reflection(N, position, s2.kDiffuse());
+        return color(0,0,0);
+        // return phong_reflection(p.normal(), r.at(hit), color(14, 153, 39)/255.0);
     }
-    hit = plane_intersection(plane_point, plane_normal, r);
-    if (hit >= 0.0) {
-        // return color(14, 153, 39)/255.0;
-        return phong_reflection(plane_normal, r.at(hit), color(14, 153, 39)/255.0);
-    }
+
     vec3 unit_direction = unit_vector(r.direction());
     hit = 0.5 * (unit_direction.y() + 1.0);
     return (1.0 - hit) * color(1.0, 1.0, 1.0) + hit * color(0.5, 0.7, 1.0);

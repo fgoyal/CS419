@@ -1,13 +1,14 @@
 #ifndef SPHERE_H
 #define SPHERE_H
 
+#include "objs.h"
 #include "vec3.h"
 #include "ray.h"
 #include <iostream>
 
 using std::sqrt;
 
-class sphere {
+class sphere : public objs {
     public: 
         sphere(const point3& center, const double radius, const vec3 kDiffuse) : c(center), rad(radius), kD(kDiffuse) {}
         point3 center() const {
@@ -26,7 +27,7 @@ class sphere {
             return unit_vector(position - c);
         }
 
-        double ray_intersection(const ray& r) const;
+        virtual double ray_intersection(const ray& r, hit_record& rec) const;
 
     public:
         point3 c;
@@ -34,17 +35,24 @@ class sphere {
         vec3 kD;
 };
 
-double sphere::ray_intersection(const ray& r) const {
+double sphere::ray_intersection(const ray& r, hit_record& rec) const {
     vec3 oc = r.origin() - c;
     double a = r.direction().length_squared();
     double half_b = dot(oc, r.direction());
     double c = oc.length_squared() - rad * rad;
     double discriminant = half_b * half_b - a * c;
+    double root;
     if (discriminant < 0) {
-        return -1.0;
-    } else {
-        return (-half_b - sqrt(discriminant)) / (a);
-    }
+        return -1.0; // no intersection
+    } 
+    
+    root = (-half_b - sqrt(discriminant)) / (a);
+
+    rec.t = root;
+    rec.p = r.at(root);
+    rec.set_normal(r, surface_normal(rec.p));
+
+    return root;
 }
 
 #endif
