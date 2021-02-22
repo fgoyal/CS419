@@ -35,6 +35,24 @@ const double sphere2_radius = 0.5;
 const point3 plane_point = point3(0, 0.1, 0);
 const vec3 plane_normal = vec3(0, -1, 0);
 
+// ----------------- PHONG REFLECTION MODEL --------------------- //
+const vec3 lightPosition = vec3(0.5, -0.5, 0);
+
+// Ambient Lighting
+const vec3 kAmbient = vec3(1.0, 0,0);
+const vec3 iAmbient = vec3(0,0,0);
+
+// Diffuse Lighting
+const vec3 kDiffuse = vec3(255, 230, 0)/255.0;
+const vec3 iDiffuse = vec3(1, 1, 1);
+
+// Specular Lighting
+const vec3 kSpecular = vec3(1.0, 1.0, 1.0);
+const vec3 iSpecular = vec3(1, 1, 1);
+const double shininess = 10;
+
+// Specular Lighting
+
 /**
  * @param center
  * @param radius
@@ -56,27 +74,39 @@ double sphere_intersection(const point3& center, double radius, const ray& r) {
 
 double plane_intersection(const point3& a, const vec3& n, const ray& r) {
     auto t = dot((a - r.origin()), n) / dot(r.direction(), n);
-    if (t >= 0) {
-        return 1.0;
-    } else {
-        return -1.0;
-    }
+    return t;
+}
+
+color phong_reflection(vec3 N, point3 position, vec3 V) {
+    vec3 L = -unit_vector(lightPosition - position); // light vector
+    vec3 R = unit_vector(reflect(L, N)); // reflection vector
+    double diffuseLight = fmax(dot(L, N), 0.0);
+    
+    vec3 ambient = kAmbient * iAmbient;
+    vec3 diffuse = kDiffuse * diffuseLight * iDiffuse;
+    vec3 specular = kSpecular * pow(dot(R, V), shininess) * iDiffuse;
+    return ambient + diffuse + specular;
 }
 
 color ray_color(const ray& r) {
     double hit = sphere_intersection(sphere1_center, sphere1_radius, r);
-    if (hit > 0.0) {
-        vec3 N = unit_vector(r.at(hit) - sphere1_center);
-        return 0.5 * color(N.x() + 1, N.y() + 1, N.z() + 1);
+    if (hit >= 0.0) {
+        point3 position = r.at(hit);
+        vec3 N = unit_vector(position - sphere1_center);
+        return phong_reflection(N, position, -unit_vector(r.direction()));
+        // return 0.5 * color(N.x() + 1, N.y() + 1, N.z() + 1);
     }
     hit = sphere_intersection(sphere2_center, sphere2_radius, r);
-    if (hit > 0.0) {
-        vec3 N = unit_vector(r.at(hit) - sphere2_center);
-        return 0.5 * color(N.x() + 1, N.y() + 1, N.z() + 1);
+    if (hit >= 0.0) {
+        point3 position = r.at(hit);
+        vec3 N = unit_vector(position - sphere2_center);
+        return phong_reflection(N, position, -unit_vector(r.direction()));
+        // vec3 N = unit_vector(r.at(hit) - sphere2_center);
+        // return 0.5 * color(N.x() + 1, N.y() + 1, N.z() + 1);
     }
     hit = plane_intersection(plane_point, plane_normal, r);
-    if (hit > 0.0) {
-        return color(1, 0, 0);
+    if (hit >= 0.0) {
+        return color(14, 153, 39)/255.0;
     }
     vec3 unit_direction = unit_vector(r.direction());
     hit = 0.5 * (unit_direction.y() + 1.0);
@@ -105,7 +135,7 @@ int main(int argc, char* argv[]) {
             perspective = true;
         }
     }
-    std::cerr << "plane normal: " << plane_normal << "\n";
+    
     std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
     for (int j = 0; j < image_height; ++j) {
         std::cerr << "\rScanlines done: " << j << ' ' << std::flush;

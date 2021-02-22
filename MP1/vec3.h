@@ -115,6 +115,13 @@ inline vec3 cross(const vec3 &u, const vec3 &v) {
 
 inline vec3 unit_vector(vec3 v) {
     return v / v.length();
-}     
+} 
+
+inline vec3 reflect(vec3 V, vec3 N) {
+    V = unit_vector(V);
+    N = unit_vector(N);
+    float R = dot(N, V);
+    return 2 * R * N - V;
+}
 
 #endif
