@@ -52,7 +52,7 @@ double sphere::ray_intersection(const ray& r, hit_record& rec) const {
     rec.t = root;
     rec.p = r.at(root);
     rec.set_normal(r, surface_normal(rec.p));
-
+    rec.kD = kD;
     return root;
 }
 

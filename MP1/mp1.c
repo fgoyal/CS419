@@ -7,6 +7,7 @@
 #include "objs.h"
 #include <iostream>
 #include <vector>
+#include <limits>
 
 static bool perspective = false;
 
@@ -64,14 +65,22 @@ color phong_reflection(vec3 N, point3 position, vec3 kDiffuse) {
 
 color ray_color(const ray& r) {
     hit_record rec;
+    hit_record tmp;
     double hit;
+    bool hit_object = false;
+    double closest = std::numeric_limits<double>::infinity();
+
     for (auto o : objects) {
-        hit = o->ray_intersection(r, rec);
-        if (hit >= 0.0) {
-            point3 position = r.at(hit);
-            vec3 N = o->surface_normal(position);
-            return phong_reflection(N, position, o->kDiffuse());
+        hit = o->ray_intersection(r, tmp);
+        if (hit >= 0.0 && hit <= closest) {
+            hit_object = true;
+            closest = tmp.t;
+            rec = tmp;
         }
+    }
+
+    if (hit_object) {
+        return phong_reflection(rec.normal, rec.p, rec.kD);
     }
     
     vec3 unit_direction = unit_vector(r.direction());

@@ -8,6 +8,7 @@ struct hit_record {
     point3 p;
     vec3 normal;
     double t;
+    color kD;
 
     inline void set_normal(const ray& r, const vec3& n) {
         bool front = dot(r.direction(), n) < 0;

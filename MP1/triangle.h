@@ -89,7 +89,8 @@ double triangle::ray_intersection(const ray& r, hit_record& rec) const {
 
     rec.t = t;
     rec.p = r.at(t);
-    rec.set_normal(r, n);
+    rec.set_normal(r, N);
+    rec.kD = kD;
     return t;
 }
 
