@@ -16,14 +16,12 @@ class plane : public objs {
             return a;
         }
 
-        vec3 normal() const {
-            return n;
-        }
+        // vec3 normal() const {
+        //     return n;
+        // }
 
-        color kDiffuse() const {
-            return kD;
-        }
-
+        virtual color kDiffuse() const;
+        virtual vec3 surface_normal(const point3 position) const;
         virtual double ray_intersection(const ray& r, hit_record& rec) const;
 
     public:
@@ -31,6 +29,13 @@ class plane : public objs {
         vec3 n;
         color kD;
 };
+color plane::kDiffuse() const {
+    return kD;
+}
+
+vec3 plane::surface_normal(const point3 position) const {
+    return n;
+}
 
 double plane::ray_intersection(const ray& r, hit_record& rec) const {
     double t = dot((a - r.origin()), n) / dot(r.direction(), n);

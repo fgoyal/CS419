@@ -18,6 +18,8 @@ struct hit_record {
 class objs {
     public:
         virtual double ray_intersection(const ray& r, hit_record& rec) const = 0;
+        virtual vec3 surface_normal(const point3 position) const = 0;
+        virtual color kDiffuse() const = 0;
 
 };
 

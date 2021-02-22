@@ -18,14 +18,8 @@ class sphere : public objs {
             return rad;
         }
 
-        color kDiffuse() const {
-            return kD;
-        }
-
-        vec3 surface_normal(const point3 position) const {
-            return unit_vector(position - c);
-        }
-
+        virtual color kDiffuse() const;
+        virtual vec3 surface_normal(const point3 position) const;
         virtual double ray_intersection(const ray& r, hit_record& rec) const;
 
     public:
@@ -33,6 +27,14 @@ class sphere : public objs {
         double rad;
         vec3 kD;
 };
+
+color sphere::kDiffuse() const {
+    return kD;
+}
+
+vec3 sphere::surface_normal(const point3 position) const {
+    return unit_vector(position - c);
+}
 
 double sphere::ray_intersection(const ray& r, hit_record& rec) const {
     vec3 oc = r.origin() - c;
