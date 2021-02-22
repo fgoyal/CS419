@@ -42,49 +42,37 @@ color triangle::kDiffuse() const {
 }
 
 vec3 triangle::surface_normal(const point3 position) const {
-    vec3 e1 = c - b;
-    vec3 e2 = a - c;
+    vec3 e1 = b - a;
+    vec3 e2 = c - a;
     return unit_vector(cross(e1, e2));
 }
 
 double triangle::ray_intersection(const ray& r, hit_record& rec) const {
     vec3 N = surface_normal(point3(0.0,0.0,0.0));
-    double nraydir = dot(N, r.direction());
-    if (abs(nraydir) < 0.0001) {
+
+    vec3 e1 = b - a;
+    vec3 e2 = c - a;
+    vec3 q = cross(r.direction(), e2);
+
+    double p = dot(e1, q);
+    if (abs(p) < 0.000001) {
         return -1;
     }
 
-    double d = dot(N, a);
-    double t = (dot(N, r.origin()) + d) / nraydir;
+    double f = 1/p;
+    vec3 s = r.origin() - a;
+    double u = f * dot(s, q);
 
-    if (t < 0) {
+    if (u < 0.0) {
         return -1;
     }
 
-    vec3 p = r.origin() + t * r.direction();
-    vec3 x;
-
-    vec3 edge0 = b - a;
-    vec3 vp0 = p - a;
-    x = cross(edge0, vp0);
-    if (dot(N, x) < 0) {
+    vec3 x = cross(s, e1);
+    double v = f * dot(r.direction(), x);
+    if (v < 0.0 || (u + v) > 1.0) {
         return -1;
     }
-
-    vec3 edge1 = c - b;
-    vec3 vp1 = p - b;
-    x = cross(edge1, vp1);
-    if (dot(N, x) < 0) {
-        return -1;
-    }
-
-    vec3 edge2 = a - c;
-    vec3 vp2 = p - c;
-    x = cross(edge2, vp2);
-    if (dot(N, x) < 0) {
-        return -1;
-    }
-
+    double t = f * dot(e2, x);
     rec.t = t;
     rec.p = r.at(t);
     rec.set_normal(r, N);
