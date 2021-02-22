@@ -11,13 +11,13 @@
 
 // ----------------- VARIABLES --------------------- //
 static bool perspective = false;
-static bool jittering = true;
-static const int fine_grid = 4;
+static bool jittering = false;
+static const int fine_grid = 2;
 static int coarse_grid = (int) sqrt(fine_grid);
 
 // Image
 const static double aspect_ratio = 1.0 / 1.0;
-const static int image_width = 400;
+const static int image_width = 100;
 const static int image_height = static_cast<int>(image_width / aspect_ratio);
 
 // Camera
@@ -130,14 +130,16 @@ color ray_color(const ray& r) {
 }
 
 vec3 get_pixel_center(int i, int j) {
-    double x = s * (i - image_width / 2 + 0.5);
-    double y = s * (j - image_height / 2 + 0.5);
+    double x = s * (i - image_width / 2);
+    double y = s * (j - image_height / 2);
     return vec3(x, y, 0);
 }
 
 vec3 get_grid_pixel_center(int i, int j, int k, int l) {
-    double x = s * (i + k - image_width / 2 + 0.5) / fine_grid;
-    double y = s * (j + l - image_height / 2 + 0.5) / fine_grid;
+    double x = s * (i - image_width / 2);
+    double y = s * (j - image_height / 2);
+    x = x + ((k + 0.5) * s / fine_grid);
+    y = y + ((l + 0.5) * s / fine_grid);
     return vec3(x, y, 0);
 }
 
@@ -156,6 +158,7 @@ int main(int argc, char* argv[]) {
         }
     }
     add_objects();
+    std::cerr << "s = " << s << "\n";
     // std::vector<color> pixel;
     // pixel.push_back(color(0,0,0));
     // pixel.push_back(color(1,1,1));
@@ -182,7 +185,7 @@ int main(int argc, char* argv[]) {
 
     std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
     for (int j = 0; j < image_height; ++j) {
-        std::cerr << "\rScanlines done: " << j << ' ' << std::flush;
+        // std::cerr << "\rScanlines done: " << j << ' ' << std::flush;
         for (int i = 0; i < image_width; ++i) {
             if (jittering) {
             //     bool sample[fine_grid][fine_grid] = {false};
@@ -209,6 +212,7 @@ int main(int argc, char* argv[]) {
                 // std::cerr << "(i, j) = " << i << " " << j << "\n";
                 ray r;
                 vec3 pixel_center = get_pixel_center(i, j);
+                // std::cerr << pixel_center << "\n";
                 // vec3 grid_center = get_grid_pixel_center(i, j);
                 if (perspective) {
                     r = ray(origin, pixel_center - origin - vec3(0, 0, focal_length));
@@ -216,9 +220,11 @@ int main(int argc, char* argv[]) {
                     r = ray(pixel_center, direction);
                 }
                 color pixel_color = ray_color(r);
+                // std::cerr << pixel_color << "\n";
                 write_color(std::cout, pixel_color);
             }
         }
+        // std::cerr << "\n";
     }
 
     std::cerr << "\nDone.\n";
