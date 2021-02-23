@@ -28,7 +28,7 @@ static int coarse_grid = (int) sqrt(fine_grid);
 
 // Image
 const static double aspect_ratio = 1.5 / 1.0;
-const static int image_width = 750;
+const static int image_width = 100;
 const static int image_height = static_cast<int>(image_width / aspect_ratio);
 
 // Camera
@@ -36,11 +36,11 @@ const float viewport_width = 4.0;
 const float s = viewport_width / image_width;
 const vec3 direction = vec3(0, 0, -1);
 
-// const point3 eyepoint = point3(0.5, 0.8, 1);
+// const point3 eyepoint = point3(-0.5, 1.0, 1);
 const point3 eyepoint = point3(0,0,0);
-const vec3 viewDir = point3(0,0, -1);
+const vec3 viewDir = point3(0, 0, -1);
 const vec3 up = vec3(0,1,0);
-double dir = 1.0;
+double dir = 2.0;
 
 const camera cam = camera(eyepoint, viewDir, up, dir, image_width, image_height, s);
 
@@ -53,13 +53,13 @@ const color sky = color(0.5, 0.7, 1.0);
 
 // Objects
 const sphere s1 = sphere(point3(-0.2, 0, -1), 0.4, s1_c);
-const sphere s2 = sphere(point3(0.2,-1.0,-0.5), 0.1, s2_c);
+const sphere s2 = sphere(point3(0.4,0,-0.5), 0.1, s2_c);
 
 const plane p = plane(point3(0, -1,0), vec3(0, -1, -0.1), p_c);
 
-const vec3 a_1 = vec3(0.7, -0.2, -1);
-const vec3 b_1 = vec3(0.4, -0.8, -0.7);
-const vec3 c_1 = vec3(0.2, 0.5, -0.7);
+const vec3 a_1 = vec3(0.5, -0.8, -1);
+const vec3 b_1 = vec3(-0.25, -1.0, -0.7);
+const vec3 c_1 = vec3(0, 0.5, -0.7);
 const triangle t1 = triangle(a_1, b_1, c_1, t1_c);
 
 vector<const objs*> objects;
