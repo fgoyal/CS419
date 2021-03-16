@@ -17,22 +17,22 @@ class aabb {
             return maximum;
         }
         
-        virtual double ray_intersection(const ray& r) const;
+        virtual bool ray_intersection(const ray& r) const;
 
     public:
         point3 minimum;
         point3 maximum;
 };
 
-double aabb::ray_intersection(const ray& r) const {
+bool aabb::ray_intersection(const ray& r) const {
     for (int i = 0; i < 3; i++) {
         double a = (minimum[i] - r.origin()[i]) / r.direction()[i];
         double b = (maximum[i] - r.origin()[i]) / r.direction()[i];
         if (fmax(a,b) <= fmin(a,b)) {
-            return -1;
+            return false;
         }
     }
-    return 1;
+    return true;
 }
 
 inline aabb surrounding_box(const aabb& a, const aabb& b) {

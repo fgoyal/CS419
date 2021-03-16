@@ -9,7 +9,7 @@
 class bvh_node : public objs {
     public: 
         bvh_node() {};
-        
+
         virtual color kDiffuse() const;
         virtual vec3 surface_normal(const point3 position) const;
         virtual bool ray_intersection(const ray& r, hit_record& rec) const;
@@ -31,7 +31,7 @@ vec3 bvh_node::surface_normal(const point3 position) const {
 
 bool bvh_node::ray_intersection(const ray& r, hit_record& rec) const {
     if (!box.ray_intersection(r)) {
-        return -1;
+        return false;
     }
 
     double hit_left = left->ray_intersection(r, rec);
