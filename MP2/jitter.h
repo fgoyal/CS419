@@ -6,19 +6,12 @@
 #include <random>
 #include <map>
 #include <iostream>
+#include "utils.h"
 
 using std::map;
 using std::pair;
 using std::cout;
 using std::cerr;
-
-/**
- * Generates a random integer between min and max
- * @return the random integer
- **/
-inline int random_int(int min, int max) {
-    return rand() % max + min;
-}
 
 /**
  * Creates a 2D array indicating where to take samples within a pixel, using multi-jittered sampling. 
@@ -41,7 +34,6 @@ inline bool** get_multi_jitter_mask(int fine_grid) {
         }
     }
 
-    srand(time(NULL));
     // for each coarse grid cell, choose a sample and make sure the row and col are unique
     for (int i = 0; i < coarse_size; i++) {
         for (int j = 0; j < coarse_size; j++) {

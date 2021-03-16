@@ -4,6 +4,7 @@
 #include "objs.h"
 #include "vec3.h"
 #include "ray.h"
+#include "aabb.h"
 
 using std::sqrt;
 
@@ -27,6 +28,7 @@ class sphere : public objs {
         virtual color kDiffuse() const;
         virtual vec3 surface_normal(const point3 position) const;
         virtual double ray_intersection(const ray& r, hit_record& rec) const;
+        virtual bool bounding_box(aabb& bbox) const;
 
     public:
         point3 c;
@@ -60,6 +62,14 @@ double sphere::ray_intersection(const ray& r, hit_record& rec) const {
     rec.set_normal(r, surface_normal(rec.p));
     rec.kD = kD;
     return root;
+}
+
+bool sphere::bounding_box(aabb& bbox) const {
+    bbox = aabb(
+        c - vec3(rad, rad, rad),
+        c + vec3(rad, rad, rad)
+    );
+    return true;
 }
 
 #endif

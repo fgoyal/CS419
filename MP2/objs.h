@@ -3,6 +3,7 @@
 
 #include "ray.h"
 #include "vec3.h"
+#include "aabb.h"
 
 /**
  * Stores the important information about a ray-object intersection.
@@ -42,6 +43,8 @@ class objs {
          **/
         virtual double ray_intersection(const ray& r, hit_record& rec) const = 0;
 
+        virtual bool bounding_box(aabb& bbox) const = 0;
+        
         /**
          * Calculates the outward surface normal at the given point on the object
          * @param position the point to find the normal at

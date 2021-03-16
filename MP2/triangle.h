@@ -4,6 +4,7 @@
 #include "objs.h"
 #include "vec3.h"
 #include "ray.h"
+#include "aabb.h"
 
 class triangle : public objs {
     public: 
@@ -29,6 +30,7 @@ class triangle : public objs {
         virtual color kDiffuse() const;
         virtual vec3 surface_normal(const point3 position) const;
         virtual double ray_intersection(const ray& r, hit_record& rec) const;
+        virtual bool bounding_box(aabb& bbox) const;
 
     public:
         point3 a;
@@ -78,6 +80,19 @@ double triangle::ray_intersection(const ray& r, hit_record& rec) const {
     rec.set_normal(r, N);
     rec.kD = kD;
     return t;
+}
+
+bool triangle::bounding_box(aabb& bbox) const {
+    double minx = fmin(fmin(a[0], b[0]), c[0]);
+    double maxx = fmax(fmax(a[0], b[0]), c[0]);
+    double miny = fmin(fmin(a[1], b[1]), c[1]);
+    double maxy = fmax(fmax(a[1], b[1]), c[1]);
+    double minz = fmin(fmin(a[2], b[2]), c[2]);
+    double maxz = fmax(fmax(a[2], b[2]), c[2]);
+
+    bbox = aabb(vec3(minx, miny, minz), vec3(maxx, maxy, maxz));
+
+    return true;
 }
 
 #endif
