@@ -1,9 +1,5 @@
-## Bare Bones Ray Tracing
-A basic ray tracer that provides ray-object intersection support for planes, spheres, and rectangles.
+## Accelerated Ray Tracing
+A ray tracer that uses Bounding Volume Hierarchy to speed up the rendering process.
 
 ### Sources
-The following code was sourced from [Ray Tracing in One Weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.html#outputanimage)  by Peter Shirley:
-- `vec3.h`
-- `ray.h`
-- `write_color()` in `color.h`
-- The concept for `hit_record` in the `objs.h` file, as well as the function `set_normal()`
+
