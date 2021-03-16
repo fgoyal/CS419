@@ -27,7 +27,7 @@ class sphere : public objs {
 
         virtual color kDiffuse() const;
         virtual vec3 surface_normal(const point3 position) const;
-        virtual double ray_intersection(const ray& r, hit_record& rec) const;
+        virtual bool ray_intersection(const ray& r, hit_record& rec) const;
         virtual bool bounding_box(aabb& bbox) const;
 
     public:
@@ -44,7 +44,7 @@ vec3 sphere::surface_normal(const point3 position) const {
     return unit_vector(position - c);
 }
 
-double sphere::ray_intersection(const ray& r, hit_record& rec) const {
+bool sphere::ray_intersection(const ray& r, hit_record& rec) const {
     vec3 oc = r.origin() - c;
     double a = r.direction().length_squared();
     double half_b = dot(oc, r.direction());
@@ -52,7 +52,7 @@ double sphere::ray_intersection(const ray& r, hit_record& rec) const {
     double discriminant = half_b * half_b - a * c;
     double root;
     if (discriminant < 0) {
-        return -1.0; // no intersection
+        return false; // no intersection
     } 
     
     root = (-half_b - sqrt(discriminant)) / (a);
@@ -61,7 +61,7 @@ double sphere::ray_intersection(const ray& r, hit_record& rec) const {
     rec.p = r.at(root);
     rec.set_normal(r, surface_normal(rec.p));
     rec.kD = kD;
-    return root;
+    return true;
 }
 
 bool sphere::bounding_box(aabb& bbox) const {

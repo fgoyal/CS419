@@ -17,20 +17,18 @@ class aabb {
             return maximum;
         }
         
-        virtual double ray_intersection(const ray& r, double min, double max) const;
+        virtual double ray_intersection(const ray& r) const;
 
     public:
         point3 minimum;
         point3 maximum;
 };
 
-double aabb::ray_intersection(const ray& r, double min, double max) const {
+double aabb::ray_intersection(const ray& r) const {
     for (int i = 0; i < 3; i++) {
         double a = (minimum[i] - r.origin()[i]) / r.direction()[i];
         double b = (maximum[i] - r.origin()[i]) / r.direction()[i];
-        min = fmin(fmin(a,b), min);
-        max = fmax(fmax(a,b), max);
-        if (max <= min) {
+        if (fmax(a,b) <= fmin(a,b)) {
             return -1;
         }
     }

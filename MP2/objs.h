@@ -39,9 +39,9 @@ class objs {
          * Determines if there is any intersection between the object and the given ray.
          * @param r the ray that intersects with the object
          * @param rec if the ray intersects, this stores information about how it hit
-         * @return the t value that generates a point on both the plane and object, or -1.0 if no intersection
+         * @return true or false depending on if it intersects
          **/
-        virtual double ray_intersection(const ray& r, hit_record& rec) const = 0;
+        virtual bool ray_intersection(const ray& r, hit_record& rec) const = 0;
 
         virtual bool bounding_box(aabb& bbox) const = 0;
         

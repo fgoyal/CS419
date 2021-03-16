@@ -48,16 +48,11 @@ double dir = 1.0;
 const camera cam = camera(eyepoint, viewDir, up, dir, image_width, image_height, s);
 
 // Colors
-const color sky = color(0,0,0);
+const color sky = color(1,1,1);
 
 // Objects
-const int NUM_OBJECTS = 100;
+const int NUM_OBJECTS = 10;
 vector<objs*> objects;
-// const color t1_c = color(0.0470446,0.678865,0.679296);
-// const vec3 a_1 = vec3(0,0,0);
-// const vec3 b_1 = vec3(0,1,0);
-// const vec3 c_1 = vec3(1,0,1);
-// const triangle t1 = triangle(a_1, b_1, c_1, t1_c);
 
 // Lighting and Shading
 const vec3 lightPosition = vec3(0.75, 0.75, 0.5);
@@ -100,14 +95,14 @@ color apply_shadows(color original, hit_record rec) {
     ray shadow_ray = ray(new_origin, lightPosition - rec.p);
     hit_record tmp;
     color shadow = original;
-    double hit; 
+    bool hit; 
     int i = 0;
     for (auto o : objects) {
         if (i == 3) { // skip plane
             break;
         }
         hit = o->ray_intersection(shadow_ray, tmp);
-        if (hit >= 0.0) {
+        if (tmp.t >= 0.0) {
             shadow = shade(shadow, 0.4);
         }
         i++;
@@ -123,13 +118,13 @@ color apply_shadows(color original, hit_record rec) {
 color ray_color(const ray& r) {
     hit_record rec;
     hit_record tmp;
-    double hit;
+    bool hit;
     bool hit_object = false;
     double closest = std::numeric_limits<double>::infinity();
 
     for (auto o : objects) {
         hit = o->ray_intersection(r, tmp);
-        if (hit >= 0.0 && hit <= closest) {
+        if (hit && tmp.t <= closest) {
             hit_object = true;
             closest = tmp.t;
             rec = tmp;
@@ -140,7 +135,7 @@ color ray_color(const ray& r) {
 
     if (hit_object) {
         to_return = phong_reflection(rec.normal, rec.p, rec.kD);
-        to_return = apply_shadows(to_return, rec);
+        // to_return = apply_shadows(to_return, rec);
         return to_return;
     } 
 
@@ -211,12 +206,6 @@ color shoot_multiple_rays(int i, int j) {
  * Add the spheres, triangle, and plane into a list of objs
  */
 void add_objects() {
-    // objects.push_back(&t1);
-    // objects.push_back(&s1);
-    // objects.push_back(&sfa);
-    // objects.push_back(&sfa2);
-    // objects.push_back(&p);
-
     for (int i = 0; i < NUM_OBJECTS; i++) {
         point3 center = random_sphere();
         // cerr << "center: " << center << "\n";

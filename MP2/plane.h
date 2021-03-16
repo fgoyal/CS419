@@ -23,7 +23,7 @@ class plane : public objs {
 
         virtual color kDiffuse() const;
         virtual vec3 surface_normal(const point3 position) const;
-        virtual double ray_intersection(const ray& r, hit_record& rec) const;
+        virtual bool ray_intersection(const ray& r, hit_record& rec) const;
         virtual bool bounding_box(aabb& bbox) const;
 
     public:
@@ -40,14 +40,14 @@ vec3 plane::surface_normal(const point3 position) const {
     return unit_vector(n);
 }
 
-double plane::ray_intersection(const ray& r, hit_record& rec) const {
+bool plane::ray_intersection(const ray& r, hit_record& rec) const {
     double t = dot((a - r.origin()), unit_vector(n)) / dot(r.direction(), unit_vector(n));
 
     rec.t = t;
     rec.p = r.at(t);
     rec.set_normal(r, unit_vector(n));
     rec.kD = kD;
-    return t;
+    return (t >= 0.0);
 }
 
 bool plane::bounding_box(aabb& bbox) const {

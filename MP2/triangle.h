@@ -29,7 +29,7 @@ class triangle : public objs {
 
         virtual color kDiffuse() const;
         virtual vec3 surface_normal(const point3 position) const;
-        virtual double ray_intersection(const ray& r, hit_record& rec) const;
+        virtual bool ray_intersection(const ray& r, hit_record& rec) const;
         virtual bool bounding_box(aabb& bbox) const;
 
     public:
@@ -49,7 +49,7 @@ vec3 triangle::surface_normal(const point3 position) const {
     return unit_vector(cross(e1, e2));
 }
 
-double triangle::ray_intersection(const ray& r, hit_record& rec) const {
+bool triangle::ray_intersection(const ray& r, hit_record& rec) const {
     vec3 N = surface_normal(point3(0.0,0.0,0.0));
 
     vec3 e1 = b - a;
@@ -58,7 +58,7 @@ double triangle::ray_intersection(const ray& r, hit_record& rec) const {
 
     double p = dot(e1, q);
     if (abs(p) < 0.000001) {
-        return -1;
+        return false;
     }
 
     double f = 1/p;
@@ -66,20 +66,20 @@ double triangle::ray_intersection(const ray& r, hit_record& rec) const {
     double u = f * dot(s, q);
 
     if (u < 0.0) {
-        return -1;
+        return false;
     }
 
     vec3 x = cross(s, e1);
     double v = f * dot(r.direction(), x);
     if (v < 0.0 || (u + v) > 1.0) {
-        return -1;
+        return false;
     }
     double t = f * dot(e2, x);
     rec.t = t;
     rec.p = r.at(t);
     rec.set_normal(r, N);
     rec.kD = kD;
-    return t;
+    return true;
 }
 
 bool triangle::bounding_box(aabb& bbox) const {
