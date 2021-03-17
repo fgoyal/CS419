@@ -14,7 +14,7 @@ class triangle : public objs {
          * @param kDiffuse the kDiffuse element for the Phong shading model
          */
         triangle(const vec3& a_t, const vec3& b_t, const vec3& c_t, const color& kDiffuse) : a(a_t), b(b_t), c(c_t), kD(kDiffuse) {
-            bbox = create_aabb();
+            bbox = create_aabb(); 
         }
         
         vec3 a_t() const {

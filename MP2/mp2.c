@@ -4,7 +4,7 @@
 #include "jitter.h"
 #include "camera.h"
 #include "utils.h"
-#include "obj_parser.h"
+#include "mesh.h"
 
 #include "objs.h"
 #include "plane.h"
@@ -66,6 +66,10 @@ const vec3 iAmbient = vec3(0,0,0);
 
 const vec3 iDiffuse = vec3(1,1,1);
 
+const vec3 kSpecular = vec3(1,1,1);
+const vec3 iSpecular = vec3(1,1,1);
+const double shininess = 50;
+
 
 // --------------------------------------- FUNCTIONS --------------------------------------- //
 
@@ -76,13 +80,17 @@ const vec3 iDiffuse = vec3(1,1,1);
  * @param kDiffuse base color for the object
  * @return shaded color
  */
-color phong_reflection(vec3 N, point3 position, vec3 kDiffuse) {
+color phong_reflection(const ray& r, vec3 N, point3 position, vec3 kDiffuse) {
     vec3 L = unit_vector(lightPosition - position); // light vector
+    vec3 V = unit_vector(eyepoint - position);
+    vec3 R = -L - 2 * dot(-L, N) * N;
     double diffuseLight = fmax(dot(L, N), 0.0);
     
     vec3 ambient = kAmbient * iAmbient;
     vec3 diffuse = kDiffuse * diffuseLight * iDiffuse;
-    return ambient + diffuse;
+    vec3 specular = kSpecular * pow(dot(R, V), shininess) * iSpecular;
+    return ambient + diffuse + specular;
+    // return ambient + diffuse;
 }
 
 /**
@@ -119,7 +127,7 @@ color ray_color(const ray& r) {
     color to_return;
 
     if (hit) {
-        to_return = phong_reflection(rec.normal, rec.p, rec.kD);
+        to_return = phong_reflection(r, rec.normal, rec.p, rec.kD);
         // to_return = apply_shadows(to_return, rec);
         return to_return;
     } 
@@ -225,7 +233,7 @@ int main(int argc, char* argv[]) {
     start = std::clock();
 
     color obj_color = color(1,0,0);
-    obj_parser obj = obj_parser("objs/cow.obj", obj_color);
+    mesh obj = mesh("objs/cow.obj", obj_color);
     vector<objs*> objects = obj.get_faces();
     root = bvh_node(objects, 0, objects.size());
 
