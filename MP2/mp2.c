@@ -4,6 +4,7 @@
 #include "jitter.h"
 #include "camera.h"
 #include "utils.h"
+#include "obj_parser.h"
 
 #include "objs.h"
 #include "plane.h"
@@ -52,9 +53,9 @@ const camera cam = camera(eyepoint, viewDir, up, dir, image_width, image_height,
 const color sky = color(0,0,0);
 
 // Objects
-const int NUM_OBJECTS = 100000;
+const int NUM_OBJECTS = 100;
 const double sphere_radius = 0.005;
-vector<objs*> objects;
+// vector<objs*> objects;
 bvh_node root;
 
 // Lighting and Shading
@@ -186,19 +187,19 @@ color shoot_multiple_rays(int i, int j) {
     return get_average_color(colors);
 }
 
-/**
- * Add the spheres, triangle, and plane into a list of objs
- */
-void add_objects() {
-    for (int i = 0; i < NUM_OBJECTS; i++) {
-        point3 center = random_sphere();
-        color c = random_vec3(0.0, 1.0);
-        sphere* randsphere = new sphere(center, sphere_radius, c);
-        objects.push_back(randsphere);
-    }
-    cerr << "created object list\n";
-    root = bvh_node(objects, 0, objects.size());
-}
+// /**
+//  * Add the spheres, triangle, and plane into a list of objs
+//  */
+// void add_objects() {
+//     for (int i = 0; i < NUM_OBJECTS; i++) {
+//         point3 center = random_sphere();
+//         color c = random_vec3(0.0, 1.0);
+//         sphere* randsphere = new sphere(center, sphere_radius, c);
+//         objects.push_back(randsphere);
+//     }
+//     cerr << "created object list\n";
+//     root = bvh_node(objects, 0, objects.size());
+// }
 
 /**
  * Checks command line arguments for "p" and "j" to set perspective projection and jittering respectively
@@ -223,10 +224,15 @@ int main(int argc, char* argv[]) {
     double duration;
     start = std::clock();
 
+    color obj_color = color(1,0,0);
+    obj_parser obj = obj_parser("objs/cow.obj", obj_color);
+    vector<objs*> objects = obj.get_faces();
+    root = bvh_node(objects, 0, objects.size());
+
     srand(time(NULL));
     set_command_line_args(argc, argv);
 
-    add_objects();
+    // add_objects();
     duration = (std::clock() - start) / (double) CLOCKS_PER_SEC;
     cerr << "\nduration to construct tree is: " << duration << "\n";
 
