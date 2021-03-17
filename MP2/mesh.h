@@ -66,7 +66,7 @@ mesh::mesh(const string filename, const color& kDiffuse) {
         
     }
     
-    cerr << vertices.size() << " " << faces.size() << "\n";
+    // cerr << vertices.size() << " " << faces.size() << "\n";
     calculate_normals();
 }
 
@@ -75,7 +75,7 @@ vector<vec3*> mesh::calculate_normals() {
     cerr << vertices.size() << " " << normals.size() << " " << indices.size() << " " << faces.size() << "\n";
     
     for (int i = 0; i < faces.size(); i++) {
-        vec3 normal = faces[i]->surface_normal(point3(0,0,0));
+        vec3 normal = faces[i]->surface_normal(point3(0.0,0.0,0.0));
         vec3* index = indices[i];
         // cerr << normal[0] << " " << normal[1] << " " << normal[2] << "\n";
         // cerr << normals[index->x()]->x() << " " << normals[index->x()]->y() << " " << normals[index->x()]->z() << " " << "\n\n\n";
@@ -92,6 +92,13 @@ vector<vec3*> mesh::calculate_normals() {
         vec3 unit = unit_vector(*normals[i]);
         normals[i] = &unit;
         // cerr << normals[i]->x() << " " << normals[i]->y() << " " << normals[i]->z() << "\n";
+    }
+
+    for (int i = 0; i < faces.size(); i++) {
+        triangle* t = (triangle*) faces[i];
+        vec3* index = indices[i];
+        t->set_vertex_normals(*normals[index->x()], *normals[index->y()], *normals[index->z()]);
+        // cerr << "triangle point: " << t->a_t() << "\n";
     }
     return normals;
 }
