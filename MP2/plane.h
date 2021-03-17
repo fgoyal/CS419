@@ -24,7 +24,7 @@ class plane : public objs {
         virtual color kDiffuse() const;
         virtual vec3 surface_normal(const point3 position) const;
         virtual bool ray_intersection(const ray& r, hit_record& rec) const;
-        virtual bool bounding_box(aabb& bbox) const;
+        virtual aabb bounding_box() const;
 
     public:
         point3 a;
@@ -50,8 +50,8 @@ bool plane::ray_intersection(const ray& r, hit_record& rec) const {
     return (t >= 0.0);
 }
 
-bool plane::bounding_box(aabb& bbox) const {
-    return true;
+aabb plane::bounding_box() const {
+    return aabb();
 }
 
 #endif

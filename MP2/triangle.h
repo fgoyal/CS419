@@ -30,7 +30,7 @@ class triangle : public objs {
         virtual color kDiffuse() const;
         virtual vec3 surface_normal(const point3 position) const;
         virtual bool ray_intersection(const ray& r, hit_record& rec) const;
-        virtual bool bounding_box(aabb& bbox) const;
+        virtual aabb bounding_box() const;
 
     public:
         point3 a;
@@ -82,7 +82,7 @@ bool triangle::ray_intersection(const ray& r, hit_record& rec) const {
     return true;
 }
 
-bool triangle::bounding_box(aabb& bbox) const {
+aabb triangle::bounding_box() const {
     double minx = fmin(fmin(a[0], b[0]), c[0]);
     double maxx = fmax(fmax(a[0], b[0]), c[0]);
     double miny = fmin(fmin(a[1], b[1]), c[1]);
@@ -90,9 +90,7 @@ bool triangle::bounding_box(aabb& bbox) const {
     double minz = fmin(fmin(a[2], b[2]), c[2]);
     double maxz = fmax(fmax(a[2], b[2]), c[2]);
 
-    bbox = aabb(vec3(minx, miny, minz), vec3(maxx, maxy, maxz));
-
-    return true;
+    return aabb(vec3(minx, miny, minz), vec3(maxx, maxy, maxz));
 }
 
 #endif

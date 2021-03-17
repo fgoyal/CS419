@@ -4,6 +4,8 @@
 #include "ray.h"
 #include "vec3.h"
 #include "aabb.h"
+#include <vector>
+#include <stdlib.h>
 
 /**
  * Stores the important information about a ray-object intersection.
@@ -43,7 +45,7 @@ class objs {
          **/
         virtual bool ray_intersection(const ray& r, hit_record& rec) const = 0;
 
-        virtual bool bounding_box(aabb& bbox) const = 0;
+        virtual aabb bounding_box() const = 0;
         
         /**
          * Calculates the outward surface normal at the given point on the object
@@ -58,5 +60,24 @@ class objs {
          **/
         virtual color kDiffuse() const = 0;
 };
+
+// inline bool bounding_box_list(const std::vector<objs*>& objects, aabb& output_box) {
+//     if (objects.empty()) {
+//         return false;
+//     }
+
+//     aabb temp_box;
+//     bool first_box = true;
+
+//     for (auto o : objects) {
+//         if (!o->bounding_box(temp_box)) {
+//             return false;
+//         }
+//         output_box = first_box ? temp_box : surrounding_box(output_box, temp_box);
+//         first_box = false;
+//     }
+
+//     return true;
+// }
 
 #endif

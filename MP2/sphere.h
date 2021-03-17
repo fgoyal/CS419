@@ -28,12 +28,14 @@ class sphere : public objs {
         virtual color kDiffuse() const;
         virtual vec3 surface_normal(const point3 position) const;
         virtual bool ray_intersection(const ray& r, hit_record& rec) const;
-        virtual bool bounding_box(aabb& bbox) const;
+        virtual aabb bounding_box() const;
 
     public:
         point3 c;
         double rad;
         vec3 kD;
+        // aabb& bbox;
+        // point3 centroid;
 };
 
 color sphere::kDiffuse() const {
@@ -64,12 +66,11 @@ bool sphere::ray_intersection(const ray& r, hit_record& rec) const {
     return true;
 }
 
-bool sphere::bounding_box(aabb& bbox) const {
-    bbox = aabb(
+aabb sphere::bounding_box() const {
+    return aabb(
         c - vec3(rad, rad, rad),
         c + vec3(rad, rad, rad)
     );
-    return true;
 }
 
 #endif

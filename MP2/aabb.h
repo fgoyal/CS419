@@ -7,7 +7,9 @@
 class aabb {
     public:
         aabb() {};
-        aabb(const point3& p0, const point3& p1) : minimum(p0), maximum(p1) {}
+        aabb(const point3& p0, const point3& p1) : minimum(p0), maximum(p1) {
+            center = calculate_centroid();
+        }
         
         point3 min() const {
             return minimum;
@@ -16,12 +18,18 @@ class aabb {
         point3 max() const {
             return maximum;
         }
+
+        point3 centroid() const {
+            return center;
+        }
         
         virtual bool ray_intersection(const ray& r) const;
+        point3 calculate_centroid() const;
 
     public:
         point3 minimum;
         point3 maximum;
+        point3 center;
 };
 
 bool aabb::ray_intersection(const ray& r) const {
@@ -43,6 +51,13 @@ inline aabb surrounding_box(const aabb& a, const aabb& b) {
                 fmax(a.max().y(), b.max().y()),
                 fmax(a.max().z(), b.max().z()));
     return aabb(p0, p1);
+}
+
+point3 aabb::calculate_centroid() const {
+    double x = (maximum[0] + minimum[0]) / 2;
+    double y = (maximum[1] + minimum[1]) / 2;
+    double z = (maximum[2] + minimum[2]) / 2;
+    return point3(x, y, z);
 }
 
 #endif
