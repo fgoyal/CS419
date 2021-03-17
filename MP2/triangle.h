@@ -13,7 +13,9 @@ class triangle : public objs {
          * @param a_t, b_t, c_t: the three edge points of the triangle
          * @param kDiffuse the kDiffuse element for the Phong shading model
          */
-        triangle(const vec3& a_t, const vec3& b_t, const vec3& c_t, const color& kDiffuse) : a(a_t), b(b_t), c(c_t), kD(kDiffuse) {}
+        triangle(const vec3& a_t, const vec3& b_t, const vec3& c_t, const color& kDiffuse) : a(a_t), b(b_t), c(c_t), kD(kDiffuse) {
+            bbox = create_aabb();
+        }
         
         vec3 a_t() const {
             return a;
@@ -27,21 +29,26 @@ class triangle : public objs {
             return c;
         }
 
-        virtual color kDiffuse() const;
+        color kDiffuse() const {
+            return kD;
+        }
+
+        aabb bounding_box() const {
+            return bbox;
+        }
+
+        // virtual color kDiffuse() const;
         virtual vec3 surface_normal(const point3 position) const;
         virtual bool ray_intersection(const ray& r, hit_record& rec) const;
-        virtual aabb bounding_box() const;
+        aabb create_aabb() const;
 
     public:
         point3 a;
         point3 b;
         point3 c;
         color kD;
+        aabb bbox;
 };
-
-color triangle::kDiffuse() const {
-    return kD;
-}
 
 vec3 triangle::surface_normal(const point3 position) const {
     vec3 e1 = b - a;
@@ -82,7 +89,7 @@ bool triangle::ray_intersection(const ray& r, hit_record& rec) const {
     return true;
 }
 
-aabb triangle::bounding_box() const {
+aabb triangle::create_aabb() const {
     double minx = fmin(fmin(a[0], b[0]), c[0]);
     double maxx = fmax(fmax(a[0], b[0]), c[0]);
     double miny = fmin(fmin(a[1], b[1]), c[1]);

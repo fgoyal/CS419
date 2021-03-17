@@ -49,15 +49,16 @@ double dir = 1.0;
 const camera cam = camera(eyepoint, viewDir, up, dir, image_width, image_height, s);
 
 // Colors
-const color sky = color(1,1,1);
+const color sky = color(0,0,0);
 
 // Objects
-const int NUM_OBJECTS = 10;
+const int NUM_OBJECTS = 100000;
+const double sphere_radius = 0.005;
 vector<objs*> objects;
 bvh_node root;
 
 // Lighting and Shading
-const vec3 lightPosition = vec3(0.75, 0.75, 0.5);
+const vec3 lightPosition = vec3(0, 0, 1);
 
 const vec3 kAmbient = vec3(1, 1, 1);
 const vec3 iAmbient = vec3(0,0,0);
@@ -97,14 +98,11 @@ color apply_shadows(color original, hit_record rec) {
     ray shadow_ray = ray(new_origin, lightPosition - rec.p);
     hit_record tmp;
     color shadow = original;
-    bool hit; 
+    // bool hit; 
     int i = 0;
-    for (auto o : objects) {
-        hit = o->ray_intersection(shadow_ray, tmp);
-        if (tmp.t >= 0.0) {
-            shadow = shade(shadow, 0.4);
-        }
-        i++;
+    bool hit = root.ray_intersection(shadow_ray, tmp);
+    if (tmp.t >= 0.0) {
+        shadow = shade(shadow, 0.4);
     }
     return shadow;
 }
@@ -117,25 +115,11 @@ color apply_shadows(color original, hit_record rec) {
 color ray_color(const ray& r) {
     hit_record rec;
     bool hit = root.ray_intersection(r, rec);
-
-    // hit_record tmp;
-    // bool hit;
-    // bool hit_object = false;
-    // double closest = std::numeric_limits<double>::infinity();
-    // for (auto o : objects) {
-    //     hit = o->ray_intersection(r, tmp);
-    //     if (hit && tmp.t <= closest) {
-    //         hit_object = true;
-    //         closest = tmp.t;
-    //         rec = tmp;
-    //     }
-    // }
-
     color to_return;
 
     if (hit) {
         to_return = phong_reflection(rec.normal, rec.p, rec.kD);
-        to_return = apply_shadows(to_return, rec);
+        // to_return = apply_shadows(to_return, rec);
         return to_return;
     } 
 
@@ -208,13 +192,11 @@ color shoot_multiple_rays(int i, int j) {
 void add_objects() {
     for (int i = 0; i < NUM_OBJECTS; i++) {
         point3 center = random_sphere();
-        cerr << "center: " << center << "\n";
         color c = random_vec3(0.0, 1.0);
-        cerr << "color: " << c << "\n";
-        sphere* randsphere = new sphere(center, 0.05, c);
+        sphere* randsphere = new sphere(center, sphere_radius, c);
         objects.push_back(randsphere);
-        // cerr << random_vec3(-1.0, 1.0) << "\n";
     }
+    cerr << "created object list\n";
     root = bvh_node(objects, 0, objects.size());
 }
 
@@ -245,7 +227,9 @@ int main(int argc, char* argv[]) {
     set_command_line_args(argc, argv);
 
     add_objects();
-    
+    duration = (std::clock() - start) / (double) CLOCKS_PER_SEC;
+    cerr << "\nduration to construct tree is: " << duration << "\n";
+
     cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
     for (int j = image_height - 1; j >=0; j--) {
         cerr << "\rScanlines done: " << j << ' ' << std::flush;

@@ -44,8 +44,6 @@ class objs {
          * @return true or false depending on if it intersects
          **/
         virtual bool ray_intersection(const ray& r, hit_record& rec) const = 0;
-
-        virtual aabb bounding_box() const = 0;
         
         /**
          * Calculates the outward surface normal at the given point on the object
@@ -59,25 +57,12 @@ class objs {
          * @return the kDiffuse component for the object in the Phong shading model
          **/
         virtual color kDiffuse() const = 0;
+
+        /**
+         * Getter for the bounding box of the object. 
+         * @return the bounding box
+         **/
+        virtual aabb bounding_box() const = 0;
 };
-
-// inline bool bounding_box_list(const std::vector<objs*>& objects, aabb& output_box) {
-//     if (objects.empty()) {
-//         return false;
-//     }
-
-//     aabb temp_box;
-//     bool first_box = true;
-
-//     for (auto o : objects) {
-//         if (!o->bounding_box(temp_box)) {
-//             return false;
-//         }
-//         output_box = first_box ? temp_box : surrounding_box(output_box, temp_box);
-//         first_box = false;
-//     }
-
-//     return true;
-// }
 
 #endif
