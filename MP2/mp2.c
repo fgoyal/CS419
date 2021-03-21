@@ -66,7 +66,7 @@ const vec3 iAmbient = vec3(0,0,0);
 
 const vec3 iDiffuse = vec3(1,1,1);
 
-const float kSpecular = 0.2;
+const vec3 kSpecular = vec3(1,1,1);
 const vec3 iSpecular = vec3(1,1,1);
 const float shininess = 20;
 
@@ -86,12 +86,13 @@ color phong_reflection(const ray& r, vec3 N, point3 position, vec3 kDiffuse) {
     // vec3 R = unit_vector(-reflect(L, N));
     vec3 R = unit_vector(2 * dot(L, N) * N - L);
     double diffuseLight = fmax(dot(L, N), 0.0);
-    
+    double specularLight = fmax(pow(dot(R, V), shininess), 0.0);
+
     vec3 ambient = kAmbient * iAmbient;
     vec3 diffuse = kDiffuse * diffuseLight * iDiffuse;
-    vec3 specular = kSpecular * pow(dot(R, V), shininess) * iSpecular;
-    // return ambient + diffuse + specular;
-    return ambient + diffuse;
+    vec3 specular = kSpecular * specularLight * iSpecular;
+    color c = ambient + diffuse + specular;
+    return vec_clamp(c, 0.0, 1.0);
 }
 
 /**

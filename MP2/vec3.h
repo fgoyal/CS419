@@ -3,6 +3,8 @@
 
 #include <cmath>
 #include <iostream>
+// #include "utils.h"
+
 
 using std::sqrt;
 using std::ostream;
@@ -124,6 +126,16 @@ inline vec3 reflect(vec3 V, vec3 N) {
     float R = dot(N, V);
     return V - 2 * R * N;
     // return 2 * R * N - V;
+}
+
+inline double clip(double n, double lower, double upper) {
+    return std::max(lower, std::min(n, upper));
+}
+
+inline vec3 vec_clamp(vec3 v, double min, double max) {
+    return vec3(clip(v.e[0], min, max),
+                clip(v.e[1], min, max),
+                clip(v.e[2], min, max));
 }
 
 #endif
