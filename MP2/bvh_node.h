@@ -28,13 +28,21 @@ class bvh_node : public objs {
         aabb bbox;
 };
 
+/**
+ * This function should never be used
+ */
 color bvh_node::kDiffuse() const {
     return color(-10,-10,-10);
 }
 
+/**
+ * This function should never be used
+ */
 vec3 bvh_node::surface_normal(const point3 position) const {
+    std::cerr << "bvh node surface normal\n";
     return vec3(-10.0,-10.0,-10.0);
 }
+
 
 bool bvh_node::ray_intersection(const ray& r, hit_record& rec) const {
     if (!bbox.ray_intersection(r)) {
@@ -47,10 +55,14 @@ bool bvh_node::ray_intersection(const ray& r, hit_record& rec) const {
     return hit_left || hit_right;
 }
 
+
 aabb bvh_node::bounding_box() const {
     return bbox;
 }
 
+/**
+ * Comparator for bounding boxes, compares the centroid of each box based on the given axis
+ */
 inline bool box_compare(const objs* a, const objs* b, int axis) {
     aabb box_a = a->bounding_box();
     aabb box_b = b->bounding_box();
@@ -70,6 +82,14 @@ bool box_z_compare(const objs* a, const objs* b) {
     return box_compare(a, b, 2);
 }
 
+/**
+ * BVH node constructor
+ * Recursively creates sub trees for both left and right sides
+ * Uses the midpoint method to partition
+ * @param objects: the list of objects to separate into subtrees
+ * @param start: the starting index of objects to look at
+ * @param end: the ending index of objects to look at
+ */
 bvh_node::bvh_node(const vector<objs*>& objects, size_t start, size_t end) {
     vector<objs*> objs = objects;
 
@@ -125,7 +145,7 @@ bvh_node::bvh_node(const vector<objs*>& objects, size_t start, size_t end) {
             right = objs[start];
         }
     } else {
-        // STOP SORTING AND JUST COMPARE EACH ONE TO MIDPOINT AND CREATE TWO LISTS, 
+        // FUTURE NOTE: STOP SORTING AND JUST COMPARE EACH ONE TO MIDPOINT AND CREATE TWO LISTS, 
         // aka no need for start and stop in constructor
         std::sort(objs.begin() + start, objs.begin() + end, comparator);
         auto median_split = (max[axis] + min[axis]) / 2;

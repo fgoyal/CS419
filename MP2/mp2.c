@@ -123,7 +123,6 @@ color apply_shadows(color original, hit_record rec) {
  * @return the final color at the point after shading and shadows
  */
 color ray_color(const ray& r) {
-    // cerr << r << "\n";
     hit_record rec;
     bool hit = root.ray_intersection(r, rec);
     color to_return;
@@ -213,6 +212,16 @@ void add_objects() {
 }
 
 /**
+ * Create a mesh given the obj file, create the BVH tree for it, and store it in root
+ */
+void create_mesh() {
+    color obj_color = color(1,0,0);
+    mesh obj = mesh("objs/cow.obj", obj_color);
+    vector<objs*> mesh = obj.get_faces();
+    root = bvh_node(mesh, 0, mesh.size());
+}
+
+/**
  * Checks command line arguments for "p" and "j" to set perspective projection and jittering respectively
  */
 void set_command_line_args(int argc, char* argv[]) {
@@ -235,16 +244,11 @@ int main(int argc, char* argv[]) {
     double duration;
     start = std::clock();
 
-    // create mesh
-    color obj_color = color(1,0,0);
-    mesh obj = mesh("objs/cow.obj", obj_color);
-    vector<objs*> mesh = obj.get_faces();
-    root = bvh_node(mesh, 0, mesh.size());
-
     srand(time(NULL));
     set_command_line_args(argc, argv);
 
     // add_objects(); // for spheres
+    create_mesh();
     duration = (std::clock() - start) / (double) CLOCKS_PER_SEC;
     cerr << "\nduration to construct tree is: " << duration << "\n";
 

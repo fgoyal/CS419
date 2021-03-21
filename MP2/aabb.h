@@ -7,6 +7,11 @@
 class aabb {
     public:
         aabb() {};
+        /** 
+         * Bounding box constructor 
+         * @param p0 min point
+         * @param p1 max point
+         **/
         aabb(const point3& p0, const point3& p1) : minimum(p0), maximum(p1) {
             center = calculate_centroid();
         }
@@ -32,6 +37,11 @@ class aabb {
         point3 center;
 };
 
+/**
+ * Determines if there is any intersection between the aabb and the given ray.
+ * @param r the ray that intersects with the aabb
+ * @return true or false depending on if it intersects
+ **/
 bool aabb::ray_intersection(const ray& r) const {
     for (int i = 0; i < 3; i++) {
         double a = (minimum[i] - r.origin()[i]) / r.direction()[i];
@@ -43,6 +53,12 @@ bool aabb::ray_intersection(const ray& r) const {
     return true;
 }
 
+/**
+ * Creates a surrounding bounding box, given two smaller bounding boxes
+ * It uses the overall max and overall min point of both boxes.
+ * @param a, b: the two inner aabbs
+ * @return the surrounding/outer aabb
+ **/
 inline aabb surrounding_box(const aabb& a, const aabb& b) {
     point3 p0(  fmin(a.min().x(), b.min().x()),
                 fmin(a.min().y(), b.min().y()),
@@ -53,6 +69,10 @@ inline aabb surrounding_box(const aabb& a, const aabb& b) {
     return aabb(p0, p1);
 }
 
+/**
+ * Calculates the centroid for the bounding box
+ * @return point3 containing the centroid
+ **/
 point3 aabb::calculate_centroid() const {
     double x = (maximum[0] + minimum[0]) / 2;
     double y = (maximum[1] + minimum[1]) / 2;

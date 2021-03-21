@@ -21,18 +21,6 @@ class ray {
         point3 at (double t) const {
             return orig + t * dir;
         }
-
-        double euclidean_distance(const point3& p) {
-            double a = pow(orig.x() - p.x(), 2);
-            double b = pow(orig.y() - p.y(), 2);
-            double c = pow(orig.z() - p.z(), 2);
-            return sqrt(a + b + c);
-        }
-
-        // std::ostream& operator<<(std::ostream &out, ray const& r) {
-        //     out << "ray: o - " << origin << " d - " << direction;
-        //     return out;
-        // }
     
     public:
         point3 orig;
