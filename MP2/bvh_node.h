@@ -72,7 +72,6 @@ bool box_z_compare(const objs* a, const objs* b) {
 
 bvh_node::bvh_node(const vector<objs*>& objects, size_t start, size_t end) {
     vector<objs*> objs = objects;
-    // cerr << "node: " << start << " " << end << "\n";
 
     // Compute (xmin, ymin, zmin) and (xmax, ymax, zmax) for centroids
     double min[3];

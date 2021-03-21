@@ -15,7 +15,6 @@ class triangle : public objs {
          */
         triangle(const vec3& a_t, const vec3& b_t, const vec3& c_t, const color& kDiffuse) : a(a_t), b(b_t), c(c_t), kD(kDiffuse) {
             bbox = create_aabb();
-            set_vertex_normals(a, b, c); 
         }
         
         vec3 a_t() const {
@@ -59,7 +58,7 @@ class triangle : public objs {
 inline double area(const point3 x, const point3 y, const point3 z) {
     vec3 e1 = y - x;
     vec3 e2 = z - x;
-    return 0.5 * unit_vector(cross(e1, e2)).length();
+    return 0.5 * cross(e1, e2).length();
 }
 
 vec3 triangle::surface_normal(const point3 position) const {
@@ -70,11 +69,13 @@ vec3 triangle::surface_normal(const point3 position) const {
 
 vec3 triangle::interpolated_normal(const point3 position) const {
     vec3 bc = barycentric_coordinates(position);
-    // float x = normal_a[0] * bc[0] + normal_b[0] * bc[1] + normal_c[0] * bc[2];
-    // float y = normal_a[1] * bc[0] + normal_b[1] * bc[1] + normal_c[1] * bc[2];
-    // float z = normal_a[2] * bc[0] + normal_b[2] * bc[1] + normal_c[2] * bc[2];
-    // return vec3(x, y, z);
-    return normal_a * bc[0] + normal_b * bc[1] + normal_c * bc[2];
+    // cerr << "bary: " << bc << "\n";
+    float x = normal_a[0] * bc[0] + normal_b[0] * bc[1] + normal_c[0] * bc[2];
+    float y = normal_a[1] * bc[0] + normal_b[1] * bc[1] + normal_c[1] * bc[2];
+    float z = normal_a[2] * bc[0] + normal_b[2] * bc[1] + normal_c[2] * bc[2];
+    return vec3(x, y, z);
+    // return normal_c;
+    // return normal_a * bc[0] + normal_b * bc[1] + normal_c * bc[2];
 }
 
 bool triangle::ray_intersection(const ray& r, hit_record& rec) const {
@@ -105,8 +106,8 @@ bool triangle::ray_intersection(const ray& r, hit_record& rec) const {
     double t = f * dot(e2, x);
     rec.t = t;
     rec.p = r.at(t);
-    rec.set_normal(r, interpolated_normal(rec.p));
-    // rec.set_normal(r, surface_normal(rec.p));
+    // rec.set_normal(r, interpolated_normal(rec.p));
+    rec.set_normal(r, surface_normal(rec.p));
     rec.kD = kD;
     return true;
 }
@@ -123,7 +124,6 @@ aabb triangle::create_aabb() const {
 }
 
 void triangle::set_vertex_normals(const vec3& x, const vec3& y, const vec3& z) {
-    cerr << x.x() << " "<< x.y() << " " << x.z() << "\n";
     normal_a = x;
     normal_b = y;
     normal_c = z;
@@ -131,9 +131,13 @@ void triangle::set_vertex_normals(const vec3& x, const vec3& y, const vec3& z) {
 
 vec3 triangle::barycentric_coordinates(const point3 position) const {
     double T = area(a, b, c);
+    // cerr << T << "\n";
     double b1 = area(position, b, c) / T;
     double b2 = area(a, position, c) / T;
     double b3 = area(a, b, position) / T;
+    // cerr << b1 << "\n";
+    // cerr << b2 << "\n";
+    // cerr << b3 << "\n";
     return vec3(b1, b2, b3);
 }
 

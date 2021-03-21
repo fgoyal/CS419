@@ -75,7 +75,7 @@ using color = vec3;
 // vec3 Utility Functions
 
 inline ostream& operator<<(ostream &out, const vec3 &v) {
-    return out << v.e[0] << ' ' << v.e[1] << ' ' << v.e[2];
+    return out << "(" << v.e[0] << ", " << v.e[1] << ", " << v.e[2] << ")";
 }
 
 inline vec3 operator+(const vec3 &u, const vec3 &v) {
@@ -122,7 +122,8 @@ inline vec3 reflect(vec3 V, vec3 N) {
     V = unit_vector(V);
     N = unit_vector(N);
     float R = dot(N, V);
-    return 2 * R * N - V;
+    return V - 2 * R * N;
+    // return 2 * R * N - V;
 }
 
 #endif

@@ -42,7 +42,7 @@ const float s = viewport_width / image_width;
 const vec3 direction = vec3(0, 0, -1);
 
 // const point3 eyepoint = point3(-0.5, 1.0, 1);
-const point3 eyepoint = point3(0,0,0);
+const point3 eyepoint = point3(0,1,1);
 const vec3 viewDir = point3(0, 0, -1);
 const vec3 up = vec3(0,1,0);
 double dir = 1.0;
@@ -53,22 +53,22 @@ const camera cam = camera(eyepoint, viewDir, up, dir, image_width, image_height,
 const color sky = color(0,0,0);
 
 // Objects
-const int NUM_OBJECTS = 100;
-const double sphere_radius = 0.005;
-// vector<objs*> objects;
+const int NUM_OBJECTS = 100000;
+const double sphere_radius = 0.02;
+vector<objs*> objects;
 bvh_node root;
 
 // Lighting and Shading
 const vec3 lightPosition = vec3(0, 0, 1);
 
-const vec3 kAmbient = vec3(1, 1, 1);
+const float kAmbient = 0.1;
 const vec3 iAmbient = vec3(0,0,0);
 
 const vec3 iDiffuse = vec3(1,1,1);
 
-const vec3 kSpecular = vec3(1,1,1);
+const float kSpecular = 0.2;
 const vec3 iSpecular = vec3(1,1,1);
-const double shininess = 50;
+const float shininess = 20;
 
 
 // --------------------------------------- FUNCTIONS --------------------------------------- //
@@ -83,14 +83,15 @@ const double shininess = 50;
 color phong_reflection(const ray& r, vec3 N, point3 position, vec3 kDiffuse) {
     vec3 L = unit_vector(lightPosition - position); // light vector
     vec3 V = unit_vector(eyepoint - position);
-    vec3 R = -L - 2 * dot(-L, N) * N;
+    // vec3 R = unit_vector(-reflect(L, N));
+    vec3 R = unit_vector(2 * dot(L, N) * N - L);
     double diffuseLight = fmax(dot(L, N), 0.0);
     
     vec3 ambient = kAmbient * iAmbient;
     vec3 diffuse = kDiffuse * diffuseLight * iDiffuse;
     vec3 specular = kSpecular * pow(dot(R, V), shininess) * iSpecular;
-    return ambient + diffuse + specular;
-    // return ambient + diffuse;
+    // return ambient + diffuse + specular;
+    return ambient + diffuse;
 }
 
 /**
@@ -122,11 +123,13 @@ color apply_shadows(color original, hit_record rec) {
  * @return the final color at the point after shading and shadows
  */
 color ray_color(const ray& r) {
+    // cerr << r << "\n";
     hit_record rec;
     bool hit = root.ray_intersection(r, rec);
     color to_return;
 
     if (hit) {
+        // return 0.5 * color(rec.normal.x() + 1, rec.normal.y() + 1, rec.normal.z() + 1);
         to_return = phong_reflection(r, rec.normal, rec.p, rec.kD);
         // to_return = apply_shadows(to_return, rec);
         return to_return;
@@ -195,19 +198,19 @@ color shoot_multiple_rays(int i, int j) {
     return get_average_color(colors);
 }
 
-// /**
-//  * Add the spheres, triangle, and plane into a list of objs
-//  */
-// void add_objects() {
-//     for (int i = 0; i < NUM_OBJECTS; i++) {
-//         point3 center = random_sphere();
-//         color c = random_vec3(0.0, 1.0);
-//         sphere* randsphere = new sphere(center, sphere_radius, c);
-//         objects.push_back(randsphere);
-//     }
-//     cerr << "created object list\n";
-//     root = bvh_node(objects, 0, objects.size());
-// }
+/**
+ * Add the spheres, triangle, and plane into a list of objs
+ */
+void add_objects() {
+    for (int i = 0; i < NUM_OBJECTS; i++) {
+        point3 center = random_sphere();
+        color c = random_vec3(0.0, 1.0);
+        sphere* randsphere = new sphere(center, sphere_radius, c);
+        objects.push_back(randsphere);
+    }
+    cerr << "created object list\n";
+    root = bvh_node(objects, 0, objects.size());
+}
 
 /**
  * Checks command line arguments for "p" and "j" to set perspective projection and jittering respectively
@@ -232,15 +235,16 @@ int main(int argc, char* argv[]) {
     double duration;
     start = std::clock();
 
+    // create mesh
     color obj_color = color(1,0,0);
     mesh obj = mesh("objs/cow.obj", obj_color);
-    vector<objs*> objects = obj.get_faces();
-    root = bvh_node(objects, 0, objects.size());
+    vector<objs*> mesh = obj.get_faces();
+    root = bvh_node(mesh, 0, mesh.size());
 
     srand(time(NULL));
     set_command_line_args(argc, argv);
 
-    // add_objects();
+    // add_objects(); // for spheres
     duration = (std::clock() - start) / (double) CLOCKS_PER_SEC;
     cerr << "\nduration to construct tree is: " << duration << "\n";
 

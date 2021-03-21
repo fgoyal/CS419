@@ -29,10 +29,18 @@ inline double random_double(double min, double max) {
     return min + (max-min)*random_double();
 }
 
+/**
+ * Generates a random vec3 where all numbers are between max and min
+ * @return the random vec3
+ **/
 inline vec3 random_vec3(double min, double max) {
     return vec3(random_double(min, max), random_double(min, max), random_double(min, max));
 }
 
+/**
+ * Generates a random sphere position, where x is [-1.9, 1.9], y is [-1.9, 1.9], and z is [-1, -0.1]
+ * @return the random position
+ **/
 inline vec3 random_sphere() {
     return vec3(random_double(-1.9, 1.9), random_double(-1.9, 1.9), random_double(-1, -0.1));
 }
