@@ -77,7 +77,7 @@ using color = vec3;
 // vec3 Utility Functions
 
 inline ostream& operator<<(ostream &out, const vec3 &v) {
-    return out << "(" << v.e[0] << ", " << v.e[1] << ", " << v.e[2] << ")";
+    return out << v.e[0] << " " << v.e[1] << " " << v.e[2];
 }
 
 inline vec3 operator+(const vec3 &u, const vec3 &v) {
@@ -132,10 +132,20 @@ inline double clip(double n, double lower, double upper) {
     return std::max(lower, std::min(n, upper));
 }
 
+inline double clip_min(double n, double lower) {
+    return std::max(lower, n);
+}
+
 inline vec3 vec_clamp(vec3 v, double min, double max) {
     return vec3(clip(v.e[0], min, max),
                 clip(v.e[1], min, max),
                 clip(v.e[2], min, max));
+}
+
+inline vec3 vec_clamp_min(vec3 v, double min) {
+    return vec3(clip_min(v.e[0], min),
+                clip_min(v.e[1], min),
+                clip_min(v.e[2], min));
 }
 
 #endif

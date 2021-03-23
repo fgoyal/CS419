@@ -52,10 +52,8 @@ mesh::mesh(const string filename, const color& kDiffuse) {
             triangle* t = new triangle(*vertices[x - 1], *vertices[y - 1], *vertices[z - 1], kDiffuse);
             faces.push_back(t);
             indices.push_back(new vec3(x - 1, y - 1, z - 1));
-            int n = indices.size() - 1;
         }
         i++;
-        
     }
     
     calculate_normals();
@@ -70,7 +68,7 @@ void mesh::calculate_normals() {
     for (int i = 0; i < faces.size(); i++) {
         vec3 normal = 0.5 * faces[i]->surface_normal(point3(0.0,0.0,0.0));
         vec3 index = *indices[i];
-        
+
         normals[index.x()] = (normal) + normals[index.x()];
         normals[index.y()] = (normal) + normals[index.y()];
         normals[index.z()] = (normal) + normals[index.z()];

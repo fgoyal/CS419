@@ -53,8 +53,8 @@ const camera cam = camera(eyepoint, viewDir, up, dir, image_width, image_height,
 const color sky = color(0,0,0);
 
 // Objects
-const int NUM_OBJECTS = 100000;
-const double sphere_radius = 0.02;
+const int NUM_OBJECTS = 1000000;
+const double sphere_radius = 0.001;
 vector<objs*> objects;
 bvh_node root;
 
@@ -70,7 +70,6 @@ const vec3 kSpecular = vec3(1,1,1);
 const vec3 iSpecular = vec3(1,1,1);
 const float shininess = 20;
 
-
 // --------------------------------------- FUNCTIONS --------------------------------------- //
 
 /**
@@ -83,7 +82,6 @@ const float shininess = 20;
 color phong_reflection(const ray& r, vec3 N, point3 position, vec3 kDiffuse) {
     vec3 L = unit_vector(lightPosition - position); // light vector
     vec3 V = unit_vector(eyepoint - position);
-    // vec3 R = unit_vector(-reflect(L, N));
     vec3 R = unit_vector(2 * dot(L, N) * N - L);
     double diffuseLight = fmax(dot(L, N), 0.0);
     double specularLight = fmax(pow(dot(R, V), shininess), 0.0);
@@ -109,7 +107,6 @@ color apply_shadows(color original, hit_record rec) {
     ray shadow_ray = ray(new_origin, lightPosition - rec.p);
     hit_record tmp;
     color shadow = original;
-    // bool hit; 
     int i = 0;
     bool hit = root.ray_intersection(shadow_ray, tmp);
     if (tmp.t >= 0.0) {
@@ -131,7 +128,7 @@ color ray_color(const ray& r) {
     if (hit) {
         // return 0.5 * color(rec.normal.x() + 1, rec.normal.y() + 1, rec.normal.z() + 1);
         to_return = phong_reflection(r, rec.normal, rec.p, rec.kD);
-        // to_return = apply_shadows(to_return, rec);
+        // // to_return = apply_shadows(to_return, rec);
         return to_return;
     } 
 
@@ -209,7 +206,7 @@ void add_objects() {
         objects.push_back(randsphere);
     }
     cerr << "created object list\n";
-    root = bvh_node(objects, 0, objects.size());
+    root = bvh_node(objects);
 }
 
 /**
@@ -217,9 +214,9 @@ void add_objects() {
  */
 void create_mesh() {
     color obj_color = color(1,0,0);
-    mesh obj = mesh("objs/cow.obj", obj_color);
+    mesh obj = mesh("objs/dragon.obj", obj_color);
     vector<objs*> mesh = obj.get_faces();
-    root = bvh_node(mesh, 0, mesh.size());
+    root = bvh_node(mesh);
 }
 
 /**

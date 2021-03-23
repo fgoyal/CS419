@@ -15,7 +15,7 @@ using std::vector;
 class bvh_node : public objs {
     public: 
         bvh_node() {};
-        bvh_node(const vector<objs*>& objects, size_t start, size_t end);
+        bvh_node(const vector<objs*>& objects);
 
         virtual color kDiffuse() const;
         virtual vec3 surface_normal(const point3 position) const;
@@ -90,75 +90,79 @@ bool box_z_compare(const objs* a, const objs* b) {
  * @param start: the starting index of objects to look at
  * @param end: the ending index of objects to look at
  */
-bvh_node::bvh_node(const vector<objs*>& objects, size_t start, size_t end) {
-    vector<objs*> objs = objects;
-
-    // Compute (xmin, ymin, zmin) and (xmax, ymax, zmax) for centroids
-    double min[3];
-    double max[3];
-    bool first = true;
-    for (int o = start; o < end; o++) {
-        for (int i = 0; i < 3; i++) {
-            double var = objects[o]->bounding_box().centroid()[i];
-            if (first) {
-                min[i] = max[i] = var;
-            } else {
-                if (var < min[i]) {
-                    min[i] = var;
-                }
-                if (var > max[i]) {
-                    max[i] = var;
-                }
-            }
-        }
-        first = false;
+bvh_node::bvh_node(const vector<objs*>& objects) {
+    // cerr << "\nnew node: " << objects.size() << "\n";
+    vector<objs*> objs_list = objects;
+    if (objs_list.size() == 0) {
+        return;
     }
-
-    // pick axis based on largest spread
-    int axis = 0;
-    double range = max[0] - min[0];
-    double yrange = max[1] - min[1];
-    double zrange = max[2] - min[2];
-    if (yrange > range) {
-        axis = 1;
-        range = yrange;
-    }
-
-    if (zrange > range) {
-        axis = 2;
-        range = zrange;
-    }
-    
-    auto comparator = (axis == 0) ? box_x_compare
-                    : (axis == 1) ? box_y_compare
-                                  : box_z_compare;
-    size_t object_span = end - start;
-
-    if (object_span == 1) {
-        left = right = objs[start];
-    } else if (object_span == 2) {
-        if (comparator(objs[start], objs[start + 1])) {
-            left = objs[start];
-            right = objs[start + 1];
-        } else {
-            left = objs[start + 1];
-            right = objs[start];
-        }
+    if (objs_list.size() == 1) {
+        left = right = objs_list[0];
+    } else if (objs_list.size() == 2) {
+        right = objs_list[0];
+        left = objs_list[1];
     } else {
-        // FUTURE NOTE: STOP SORTING AND JUST COMPARE EACH ONE TO MIDPOINT AND CREATE TWO LISTS, 
-        // aka no need for start and stop in constructor
-        std::sort(objs.begin() + start, objs.begin() + end, comparator);
+        // Compute (xmin, ymin, zmin) and (xmax, ymax, zmax) for centroids
+        double min[3];
+        double max[3];
+        bool first = true;
+        for (int o = 0; o < objs_list.size(); o++) {
+            for (int i = 0; i < 3; i++) {
+                double var = objs_list[o]->bounding_box().centroid()[i];
+                if (first) {
+                    min[i] = max[i] = var;
+                } else {
+                    if (var < min[i]) {
+                        min[i] = var;
+                    }
+                    if (var > max[i]) {
+                        max[i] = var;
+                    }
+                }
+            }
+            first = false;
+        }
+
+        // pick axis based on largest spread
+        int axis = 0;
+        double range = max[0] - min[0];
+        double yrange = max[1] - min[1];
+        double zrange = max[2] - min[2];
+        if (yrange > range) {
+            axis = 1;
+            range = yrange;
+        }
+
+        if (zrange > range) {
+            axis = 2;
+            range = zrange;
+        }
+
         auto median_split = (max[axis] + min[axis]) / 2;
-        int mid = start;
-        for (int o = start; o < end; o++) {
-            double curr = objs[o]->bounding_box().centroid()[axis];
-            if (curr > median_split) {
-                mid = fmax(mid, o);
-                break;
+        vector<objs*> left_split;
+        vector<objs*> right_split;
+        // cerr << "median: " << median_split << "\n";
+        for (int o = 0; o < objs_list.size(); o++) {
+            double curr = objs_list[o]->bounding_box().centroid()[axis];
+            // cerr << "curr: " << curr << "\n";
+            if (curr >= median_split) {
+                right_split.push_back(objs_list[o]);
+            } else {
+                left_split.push_back(objs_list[o]);
             }
         }
-        left = new bvh_node(objs, start, mid);
-        right = new bvh_node(objs, mid, end);
+        // cerr << "left size: " << left_split.size() << " right size: " << right_split.size() << "\n";
+        if (left_split.size() == 1) {
+            left = left_split[0];
+        } else {
+            left = new bvh_node(left_split);
+        }
+
+        if (right_split.size() == 1) {
+            right = right_split[0];
+        } else {
+            right = new bvh_node(right_split);
+        }
     }
 
     aabb box_left = left->bounding_box();
