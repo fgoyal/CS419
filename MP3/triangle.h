@@ -5,6 +5,7 @@
 #include "vec3.h"
 #include "ray.h"
 #include "aabb.h"
+#include "material.h"
 
 class triangle : public objs {
     public: 
@@ -13,7 +14,7 @@ class triangle : public objs {
          * @param a_t, b_t, c_t: the three edge points of the triangle
          * @param kDiffuse the kDiffuse element for the Phong shading model
          */
-        triangle(const vec3& a_t, const vec3& b_t, const vec3& c_t, const color& kDiffuse) : a(a_t), b(b_t), c(c_t), kD(kDiffuse) {
+        triangle(const vec3& a_t, const vec3& b_t, const vec3& c_t, const color& kDiffuse, material* mat) : a(a_t), b(b_t), c(c_t), kD(kDiffuse), m(mat) {
             bbox = create_aabb();
         }
         
@@ -31,6 +32,10 @@ class triangle : public objs {
 
         color kDiffuse() const {
             return kD;
+        }
+
+        material* mat() const {
+            return m;
         }
 
         aabb bounding_box() const {
@@ -54,6 +59,7 @@ class triangle : public objs {
         vec3 normal_a;
         vec3 normal_b;
         vec3 normal_c;
+        material* m;
 };
 
 /**
@@ -109,8 +115,8 @@ bool triangle::ray_intersection(const ray& r, hit_record& rec) const {
     double t = f * dot(e2, x);
     rec.t = t;
     rec.p = r.at(t);
-    rec.set_normal(r, interpolated_normal(rec.p));
-    // rec.set_normal(r, surface_normal(rec.p));
+    // rec.set_normal(r, interpolated_normal(rec.p));
+    rec.set_normal(r, surface_normal(rec.p));
     rec.kD = kD;
     return true;
 }

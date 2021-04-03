@@ -5,6 +5,7 @@
 #include "vec3.h"
 #include "ray.h"
 #include "aabb.h"
+#include "material.h"
 
 using std::sqrt;
 
@@ -16,7 +17,7 @@ class sphere : public objs {
          * @param radius the radius for the sphere
          * @param kDiffuse the kDiffuse element for the Phong shading model
          */
-        sphere(const point3& center, const double radius, const color& kDiffuse) : c(center), rad(radius), kD(kDiffuse) {
+        sphere(const point3& center, const double radius, const color& kDiffuse, material* mat) : c(center), rad(radius), kD(kDiffuse), m(mat) {
             bbox = create_aabb();
         }
         point3 center() const {
@@ -29,6 +30,10 @@ class sphere : public objs {
 
         color kDiffuse() const {
             return kD;
+        }
+
+        material* mat() const {
+            return m;
         }
 
         aabb bounding_box() const {
@@ -45,6 +50,7 @@ class sphere : public objs {
         double rad;
         vec3 kD;
         aabb bbox;
+        material* m;
 };
 
 // color sphere::kDiffuse() const {

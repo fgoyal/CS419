@@ -13,7 +13,7 @@ using namespace std;
 
 class mesh {
     public: 
-        mesh(const string filename, const color& kDiffuse);
+        mesh(const string filename, const color& kDiffuse, material* m);
 
         vector<vec3*> get_vertices() {
             return vertices;
@@ -37,7 +37,7 @@ class mesh {
  * @param filename: the obj file to load the mesh from
  * @param kDiffuse: the color to shade the mesh
  */
-mesh::mesh(const string filename, const color& kDiffuse) {
+mesh::mesh(const string filename, const color& kDiffuse, material* m) {
     ifstream file(filename);
     string str;
     char a;
@@ -50,7 +50,7 @@ mesh::mesh(const string filename, const color& kDiffuse) {
             // print('v', vertices)
         }
         if (a == 'f') {
-            triangle* t = new triangle(*vertices[x - 1], *vertices[y - 1], *vertices[z - 1], kDiffuse);
+            triangle* t = new triangle(*vertices[x - 1], *vertices[y - 1], *vertices[z - 1], kDiffuse, m);
             faces.push_back(t);
             indices.push_back(new vec3(x - 1, y - 1, z - 1));
             // print('f', indices)

@@ -121,11 +121,7 @@ inline vec3 unit_vector(vec3 v) {
 } 
 
 inline vec3 reflect(vec3 V, vec3 N) {
-    V = unit_vector(V);
-    N = unit_vector(N);
-    float R = dot(N, V);
-    return V - 2 * R * N;
-    // return 2 * R * N - V;
+    return V - 2 * dot(V, N) * N;
 }
 
 inline double clip(double n, double lower, double upper) {

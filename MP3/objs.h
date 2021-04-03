@@ -1,11 +1,13 @@
 #ifndef OBJS_H
 #define OBJS_H
-
 #include "ray.h"
 #include "vec3.h"
 #include "aabb.h"
+
 #include <vector>
 #include <stdlib.h>
+
+class material;
 
 /**
  * Stores the important information about a ray-object intersection.
@@ -22,6 +24,8 @@ struct hit_record {
 
     /** the kDiffuse component for the given object */
     color kD;
+
+    material* mat;
 
     /**
      * Determines if the normal faces away from the object and changes it if it doesn't

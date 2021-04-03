@@ -5,6 +5,7 @@
 #include "camera.h"
 #include "utils.h"
 #include "mesh.h"
+#include "material.h"
 
 #include "objs.h"
 #include "plane.h"
@@ -42,21 +43,37 @@ const float s = viewport_width / image_width;
 const vec3 direction = vec3(0, 0, -1);
 
 // const point3 eyepoint = point3(-0.5, 1.0, 1);
-const point3 eyepoint = point3(0,1,1);
+const point3 eyepoint = point3(0,0,0);
 const vec3 viewDir = point3(0, 0, -1);
 const vec3 up = vec3(0,1,0);
-double dir = 1.0;
+double dir = 2.0;
 
 const camera cam = camera(eyepoint, viewDir, up, dir, image_width, image_height, s);
 
 // Colors
-const color sky = color(0,0,0);
+const color sky = color(0.5, 0.7, 1.0);
 
 // Objects
-const int NUM_OBJECTS = 1000;
-const double sphere_radius = 0.05;
+const int NUM_OBJECTS = 10;
+const double sphere_radius = 0.5;
 vector<objs*> objects;
 bvh_node root;
+color s1_c = color(91,75,122)/255.0;
+color s2_c = color(193,3,55)/255.0;
+color p_c = color(14, 153, 39)/255.0;
+color t1_c = color(0.0470446,0.678865,0.679296);
+
+material* s1_m = new lambertian(color(0.8, 0.8, 0.0));
+material* s2_m = new lambertian(color(0.7, 0.3, 0.2));
+material* t1_m = new lambertian(color(0.7, 0.3, 0.2));
+
+sphere* s1 = new sphere(point3(-0.2, 0, -1), 0.4, s1_c, s1_m);
+sphere* s2 = new sphere(point3(0.4,0,-0.5), 0.1, s2_c, s2_m);
+plane* p = new plane(point3(0, -1,0), vec3(0, -1, -0.1), p_c);
+const vec3 a_1 = vec3(0.5, -0.8, -1);
+const vec3 b_1 = vec3(-0.25, -1.0, -0.7);
+const vec3 c_1 = vec3(0, 0.5, -0.7);
+triangle* t1 = new triangle(a_1, b_1, c_1, t1_c, t1_m);
 
 // Lighting and Shading
 const vec3 lightPosition = vec3(0, 0, 1);
@@ -82,14 +99,16 @@ const float shininess = 20;
 color phong_reflection(const ray& r, vec3 N, point3 position, vec3 kDiffuse) {
     vec3 L = unit_vector(lightPosition - position); // light vector
     vec3 V = unit_vector(eyepoint - position);
-    vec3 R = unit_vector(2 * dot(L, N) * N - L);
+    vec3 R = unit_vector(reflect(L, N));
+    // vec3 R = unit_vector(2 * dot(L, N) * N - L);
     double diffuseLight = fmax(dot(L, N), 0.0);
     double specularLight = fmax(pow(dot(R, V), shininess), 0.0);
 
     vec3 ambient = kAmbient * iAmbient;
     vec3 diffuse = kDiffuse * diffuseLight * iDiffuse;
-    vec3 specular = kSpecular * specularLight * iSpecular;
-    color c = ambient + diffuse + specular;
+    // vec3 specular = kSpecular * specularLight * iSpecular;
+    // color c = ambient + diffuse + specular;
+    color c = ambient + diffuse;
     return vec_clamp(c, 0.0, 1.0);
 }
 
@@ -125,12 +144,27 @@ color ray_color(const ray& r) {
     bool hit = root.ray_intersection(r, rec);
     color to_return;
 
+    // hit_record rec;
+    // hit_record tmp;
+    // bool hit;
+    // bool hit_object = false;
+    // double closest = std::numeric_limits<double>::infinity();
+
+    // for (auto o : objects) {
+    //     hit = o->ray_intersection(r, tmp);
+    //     if (hit && tmp.t <= closest) {
+    //         hit_object = true;
+    //         closest = tmp.t;
+    //         rec = tmp;
+    //     }
+    // }
+
     if (hit) {
-        cerr << rec.normal << "\n";
+        // cerr << rec.normal << "\n";
         // return color(rec.normal.z(), rec.normal.z(), rec.normal.z());
         // return 0.5 * color(rec.normal.x() + 1, rec.normal.y() + 1, rec.normal.z() + 1);
         to_return = phong_reflection(r, rec.normal, rec.p, rec.kD);
-        // // to_return = apply_shadows(to_return, rec);
+        // to_return = apply_shadows(to_return, rec);
         return to_return;
     } 
 
@@ -201,13 +235,18 @@ color shoot_multiple_rays(int i, int j) {
  * Add the spheres, triangle, and plane into a list of objs
  */
 void add_objects() {
-    for (int i = 0; i < NUM_OBJECTS; i++) {
-        point3 center = random_sphere();
-        color c = random_vec3(0.0, 1.0);
-        sphere* randsphere = new sphere(center, sphere_radius, c);
-        objects.push_back(randsphere);
-    }
-    cerr << "created object list\n";
+    objects.push_back(s1);
+    objects.push_back(s2);
+    // objects.push_back(t1);
+    // objects.push_back(p);
+
+    // for (int i = 0; i < NUM_OBJECTS; i++) {
+    //     point3 center = random_sphere();
+    //     color c = random_vec3(0.0, 1.0);
+    //     sphere* randsphere = new sphere(center, sphere_radius, c);
+    //     objects.push_back(randsphere);
+    // }
+    // cerr << "created object list\n";
     root = bvh_node(objects);
 }
 
@@ -216,7 +255,7 @@ void add_objects() {
  */
 void create_mesh() {
     color obj_color = color(1,0,0);
-    mesh obj = mesh("objs/dragon.obj", obj_color);
+    mesh obj = mesh("objs/dragon.obj", obj_color, s1_m);
     vector<objs*> mesh = obj.get_faces();
     root = bvh_node(mesh);
 }
