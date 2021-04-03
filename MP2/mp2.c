@@ -37,7 +37,7 @@ const static int image_width = 400;
 const static int image_height = static_cast<int>(image_width / aspect_ratio);
 
 // Camera
-const float viewport_width = 4.0;
+const float viewport_width = 2.0;
 const float s = viewport_width / image_width;
 const vec3 direction = vec3(0, 0, -1);
 
@@ -126,6 +126,8 @@ color ray_color(const ray& r) {
     color to_return;
 
     if (hit) {
+        cerr << rec.normal << "\n";
+        // return color(rec.normal.z(), rec.normal.z(), rec.normal.z());
         // return 0.5 * color(rec.normal.x() + 1, rec.normal.y() + 1, rec.normal.z() + 1);
         to_return = phong_reflection(r, rec.normal, rec.p, rec.kD);
         // // to_return = apply_shadows(to_return, rec);
@@ -143,7 +145,7 @@ color ray_color(const ray& r) {
 vec3 get_pixel_center(int i, int j) {
     double x = s * (i - image_width / 2 + 0.5);
     double y = s * (j - image_height / 2 + 0.5);
-    return vec3(x, y, 0);
+    return vec3(x, y, 1);
 }
 
 /**
