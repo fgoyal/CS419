@@ -118,7 +118,8 @@ bool triangle::ray_intersection(const ray& r, hit_record& rec) const {
     // rec.set_normal(r, interpolated_normal(rec.p));
     rec.set_normal(r, surface_normal(rec.p));
     rec.kD = kD;
-    return true;
+    rec.mat = m;
+    return (t >= 0.0);
 }
 
 aabb triangle::create_aabb() const {

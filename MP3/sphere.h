@@ -78,7 +78,9 @@ bool sphere::ray_intersection(const ray& r, hit_record& rec) const {
     rec.p = r.at(root);
     rec.set_normal(r, surface_normal(rec.p));
     rec.kD = kD;
-    return true;
+    rec.mat = m;
+    // return true;
+    return (root >= 0.0);
 }
 
 aabb sphere::create_aabb() const {
