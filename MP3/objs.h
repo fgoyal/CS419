@@ -47,7 +47,7 @@ class objs {
          * @param rec if the ray intersects, this stores information about how it hit
          * @return true or false depending on if it intersects
          **/
-        virtual bool ray_intersection(const ray& r, hit_record& rec) const = 0;
+        virtual bool ray_intersection(const ray& r, hit_record& rec, double tmin, double tmax) const = 0;
         
         /**
          * Calculates the outward surface normal at the given point on the object

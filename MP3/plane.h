@@ -30,7 +30,7 @@ class plane : public objs {
         }
 
         virtual vec3 surface_normal(const point3 position) const;
-        virtual bool ray_intersection(const ray& r, hit_record& rec) const;
+        virtual bool ray_intersection(const ray& r, hit_record& rec, double tmin, double tmax) const;
         virtual aabb bounding_box() const;
 
     public:
@@ -44,7 +44,7 @@ vec3 plane::surface_normal(const point3 position) const {
     return unit_vector(n);
 }
 
-bool plane::ray_intersection(const ray& r, hit_record& rec) const {
+bool plane::ray_intersection(const ray& r, hit_record& rec, double tmin, double tmax) const {
     double t = dot((a - r.origin()), unit_vector(n)) / dot(r.direction(), unit_vector(n));
 
     rec.t = t;

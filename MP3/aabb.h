@@ -28,7 +28,7 @@ class aabb {
             return center;
         }
         
-        virtual bool ray_intersection(const ray& r) const;
+        virtual bool ray_intersection(const ray& r, double tmin, double tmax) const;
         point3 calculate_centroid() const;
 
     public:
@@ -42,11 +42,13 @@ class aabb {
  * @param r the ray that intersects with the aabb
  * @return true or false depending on if it intersects
  **/
-bool aabb::ray_intersection(const ray& r) const {
+bool aabb::ray_intersection(const ray& r, double tmin, double tmax) const {
     for (int i = 0; i < 3; i++) {
         double a = (minimum[i] - r.origin()[i]) / r.direction()[i];
         double b = (maximum[i] - r.origin()[i]) / r.direction()[i];
-        if (fmax(a,b) <= fmin(a,b)) {
+        tmin = fmax(tmin, fmin(a,b));
+        tmax = fmin(tmax, fmax(a,b));
+        if (tmax <= tmin) {
             return false;
         }
     }

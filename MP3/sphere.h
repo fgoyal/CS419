@@ -42,7 +42,7 @@ class sphere : public objs {
 
         // virtual color kDiffuse() const;
         virtual vec3 surface_normal(const point3 position) const;
-        virtual bool ray_intersection(const ray& r, hit_record& rec) const;
+        virtual bool ray_intersection(const ray& r, hit_record& rec, double tmin, double tmax) const;
         aabb create_aabb() const;
 
     public:
@@ -61,7 +61,7 @@ vec3 sphere::surface_normal(const point3 position) const {
     return unit_vector(position - c);
 }
 
-bool sphere::ray_intersection(const ray& r, hit_record& rec) const {
+bool sphere::ray_intersection(const ray& r, hit_record& rec, double tmin, double tmax) const {
     vec3 oc = r.origin() - c;
     double a = r.direction().length_squared();
     double half_b = dot(oc, r.direction());
@@ -73,14 +73,20 @@ bool sphere::ray_intersection(const ray& r, hit_record& rec) const {
     } 
     
     root = (-half_b - sqrt(discriminant)) / (a);
+    if (root < tmin || root > tmax) {
+        root = (-half_b + sqrt(discriminant)) / (a);
+        if (root < tmin || root > tmax) {
+            return false;
+        }
+    }
 
     rec.t = root;
     rec.p = r.at(root);
     rec.set_normal(r, surface_normal(rec.p));
     rec.kD = kD;
     rec.mat = m;
-    // return true;
-    return (root >= 0.0);
+    return true;
+    // return (root >= 0.0);
 }
 
 aabb sphere::create_aabb() const {

@@ -19,11 +19,13 @@
 #include <ctime>
 #include <cstdlib>
 #include <cstdio>
+#include <limits>
 
 using std::cout;
 using std::cerr;
 using std::string;
 using std::vector;
+using std::numeric_limits;
 
 
 // --------------------------------------- VARIABLES --------------------------------------- //
@@ -32,6 +34,7 @@ static bool jittering = false;
 static const int fine_grid = 4;
 static int coarse_grid = (int) sqrt(fine_grid);
 const int max_depth = 50;
+double infinity = numeric_limits<double>::infinity();
 
 // Image
 const static double aspect_ratio = 1.0 / 1.0;
@@ -127,7 +130,7 @@ color apply_shadows(color original, hit_record rec) {
     hit_record tmp;
     color shadow = original;
     // int i = 0;
-    bool hit = root.ray_intersection(shadow_ray, tmp);
+    bool hit = root.ray_intersection(shadow_ray, tmp, 0.001, infinity);
     if (hit) {
         shadow = shade(shadow, 0.4);
     }
@@ -154,27 +157,27 @@ color ray_color(const ray& r, int depth) {
         return sky;
     }
 
-    // hit_record rec;
-    // bool hit = root.ray_intersection(r, rec);
-
     hit_record rec;
-    hit_record tmp;
-    bool hit;
-    bool hit_object = false;
-    double closest = std::numeric_limits<double>::infinity();
+    bool hit = root.ray_intersection(r, rec, 0.001, infinity);
 
-    for (auto o : objects) {
-        hit = o->ray_intersection(r, tmp);
-        if (hit && tmp.t <= closest) {
-            hit_object = true;
-            closest = tmp.t;
-            rec = tmp;
-        }
-    }
+    // hit_record rec;
+    // hit_record tmp;
+    // bool hit;
+    // bool hit_object = false;
+    // double closest = std::numeric_limits<double>::infinity();
+
+    // for (auto o : objects) {
+    //     hit = o->ray_intersection(r, tmp, 0.001, infinity);
+    //     if (hit && tmp.t <= closest) {
+    //         hit_object = true;
+    //         closest = tmp.t;
+    //         rec = tmp;
+    //     }
+    // }
     color to_return;
 
-    if (hit_object) {
-    // if (hit) {
+    // if (hit_object) {
+    if (hit) {
         // ray scattered;
         // if (rec.mat->scatter(r, rec, scattered)) {
         //     return rec.kD * ray_color(scattered, depth - 1);

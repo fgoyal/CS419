@@ -45,7 +45,7 @@ class triangle : public objs {
         // virtual color kDiffuse() const;
         vec3 surface_normal(const point3 position) const;
         vec3 interpolated_normal(const point3 position) const;
-        bool ray_intersection(const ray& r, hit_record& rec) const;
+        bool ray_intersection(const ray& r, hit_record& rec, double tmin, double tmax) const;
         aabb create_aabb() const;
         void set_vertex_normals(const vec3& a, const vec3& b, const vec3& c);
         vec3 barycentric_coordinates(const point3 position) const;
@@ -89,7 +89,7 @@ vec3 triangle::interpolated_normal(const point3 position) const {
     return normal_a * bc[0] + normal_b * bc[1] + normal_c * bc[2];
 }
 
-bool triangle::ray_intersection(const ray& r, hit_record& rec) const {
+bool triangle::ray_intersection(const ray& r, hit_record& rec, double tmin, double tmax) const {
     vec3 e1 = b - a;
     vec3 e2 = c - a;
     vec3 q = cross(r.direction(), e2);

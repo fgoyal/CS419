@@ -19,7 +19,7 @@ class bvh_node : public objs {
 
         virtual color kDiffuse() const;
         virtual vec3 surface_normal(const point3 position) const;
-        virtual bool ray_intersection(const ray& r, hit_record& rec) const;
+        virtual bool ray_intersection(const ray& r, hit_record& rec, double tmin, double tmax) const;
         virtual aabb bounding_box() const;
 
     public:
@@ -44,13 +44,13 @@ vec3 bvh_node::surface_normal(const point3 position) const {
 }
 
 
-bool bvh_node::ray_intersection(const ray& r, hit_record& rec) const {
-    if (!bbox.ray_intersection(r)) {
+bool bvh_node::ray_intersection(const ray& r, hit_record& rec, double tmin, double tmax) const {
+    if (!bbox.ray_intersection(r, tmin, tmax)) {
         return false;
     }
 
-    double hit_left = left->ray_intersection(r, rec);
-    double hit_right = right->ray_intersection(r, rec);
+    double hit_left = left->ray_intersection(r, rec, tmin, tmax);
+    double hit_right = right->ray_intersection(r, rec, tmin, hit_left ? rec.t : tmax);
 
     return hit_left || hit_right;
 }
