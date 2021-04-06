@@ -45,13 +45,18 @@ vec3 bvh_node::surface_normal(const point3 position) const {
 
 
 bool bvh_node::ray_intersection(const ray& r, hit_record& rec, double tmin, double tmax) const {
+    cerr << "intersection " << tmin << " " << tmax << "\n";
+    cerr << "box: " << bbox << "\n";
     if (!bbox.ray_intersection(r, tmin, tmax)) {
+        cerr << "no intersection\n";
         return false;
     }
-
+    cerr << "\n";
+    cerr << "left ";
     double hit_left = left->ray_intersection(r, rec, tmin, tmax);
-    double hit_right = right->ray_intersection(r, rec, tmin, hit_left ? rec.t : tmax);
-
+    // double hit_right = right->ray_intersection(r, rec, tmin, hit_left ? rec.t : tmax);
+    cerr << "right ";
+    double hit_right = right->ray_intersection(r, rec, tmin, tmax);
     return hit_left || hit_right;
 }
 
@@ -163,12 +168,19 @@ bvh_node::bvh_node(const vector<objs*>& objects) {
         } else {
             right = new bvh_node(right_split);
         }
+        cerr << "num left objects: " << left_split.size() << "\n";
+        cerr << "num right objects: " << right_split.size() << "\n";
     }
 
+    
+
     aabb box_left = left->bounding_box();
+    cerr << "left - " << box_left << "\n";
     aabb box_right = right->bounding_box();
+    cerr << "right - " << box_right << "\n";
     
     bbox = surrounding_box(box_left, box_right);
+    cerr << "surrounding - " << bbox << "\n\n";
 }
 
 #endif

@@ -113,6 +113,9 @@ bool triangle::ray_intersection(const ray& r, hit_record& rec, double tmin, doub
         return false;
     }
     double t = f * dot(e2, x);
+    // if (t <= tmin || t >= tmax) {
+    //     return false;
+    // }
     rec.t = t;
     rec.p = r.at(t);
     // rec.set_normal(r, interpolated_normal(rec.p));

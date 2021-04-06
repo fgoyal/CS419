@@ -38,7 +38,7 @@ double infinity = numeric_limits<double>::infinity();
 
 // Image
 const static double aspect_ratio = 1.0 / 1.0;
-const static int image_width = 200;
+const static int image_width = 150;
 const static int image_height = static_cast<int>(image_width / aspect_ratio);
 
 // Camera
@@ -157,35 +157,35 @@ color ray_color(const ray& r, int depth) {
         return sky;
     }
 
-    hit_record rec;
-    bool hit = root.ray_intersection(r, rec, 0.001, infinity);
-
     // hit_record rec;
-    // hit_record tmp;
-    // bool hit;
-    // bool hit_object = false;
-    // double closest = std::numeric_limits<double>::infinity();
+    // bool hit = root.ray_intersection(r, rec, 0.00, infinity);
 
-    // for (auto o : objects) {
-    //     hit = o->ray_intersection(r, tmp, 0.001, infinity);
-    //     if (hit && tmp.t <= closest) {
-    //         hit_object = true;
-    //         closest = tmp.t;
-    //         rec = tmp;
-    //     }
-    // }
+    hit_record rec;
+    hit_record tmp;
+    bool hit;
+    bool hit_object = false;
+    double closest = std::numeric_limits<double>::infinity();
+
+    for (auto o : objects) {
+        hit = o->ray_intersection(r, tmp, 0.001, infinity);
+        if (hit && tmp.t <= closest) {
+            hit_object = true;
+            closest = tmp.t;
+            rec = tmp;
+        }
+    }
     color to_return;
-
-    // if (hit_object) {
-    if (hit) {
-        // ray scattered;
-        // if (rec.mat->scatter(r, rec, scattered)) {
-        //     return rec.kD * ray_color(scattered, depth - 1);
-        // }
+    // cerr << hit << " " << rec.t << " (" << rec.kD << ")\n";
+    if (hit_object) {
+    // if (hit) {
+        ray scattered;
+        if (rec.mat->scatter(r, rec, scattered)) {
+            return rec.kD * ray_color(scattered, depth - 1);
+        }
         // cerr << rec.normal << "\n";
         // return color(rec.normal.z(), rec.normal.z(), rec.normal.z());
         // return 0.5 * color(rec.normal.x() + 1, rec.normal.y() + 1, rec.normal.z() + 1);
-        to_return = phong_reflection(rec.normal, rec.p, rec.kD);
+        // to_return = phong_reflection(rec.normal, rec.p, rec.kD);
         // to_return = apply_shadows(to_return, rec);
         return to_return;
     }  
@@ -257,7 +257,7 @@ color shoot_multiple_rays(int i, int j) {
  * Add the spheres, triangle, and plane into a list of objs
  */
 void add_objects() {
-    // objects.push_back(t1);
+    objects.push_back(t1);
     objects.push_back(s1);
     objects.push_back(s2);
     objects.push_back(s3);
@@ -270,7 +270,9 @@ void add_objects() {
     //     objects.push_back(randsphere);
     // }
     // cerr << "created object list\n";
+    cerr << "OBJECTS SIZE: " << objects.size() << "\n";
     root = bvh_node(objects);
+    // cerr << "root bbox: " << root.bounding_box() << "\n";
 }
 
 /**
@@ -285,46 +287,22 @@ void create_mesh() {
 }
 
 void generate_checkerboard(double y, color color_a, color color_b) {
-    // vec3 a = vec3(-0.5, y, -1);
-    // vec3 b = vec3(-0.5, y, 0);
-    // vec3 c = vec3(0.5, y, 0);
-    // vec3 d = vec3(0.5, y, -1);
-    // vec3 e = vec3(1, y, 0);
-    // vec3 f = vec3(1, y, -1);
-    // vec3 g = vec3(-0.5, y, -2);
-    // vec3 h = vec3(0.5, y, -2);
-    // vec3 i = vec3(1, y, -2);
-    vec3 a = vec3(-100, y, -10);
-    vec3 b = vec3(-10, y, 0);
-    vec3 c = vec3(10, y, 0);
-    vec3 d = vec3(100, y, -10);
-    vec3 e = vec3(20, y, 0);
-    vec3 f = vec3(20, y, -10);
-    vec3 g = vec3(-10, y, -20);
-    vec3 h = vec3(20, y, -20);
-    vec3 i = vec3(20, y, -20);
-    // objects.push_back(new triangle(a, b, c, color_a, new lambertian()));
-    // objects.push_back(new triangle(b, c, d, color_a, new lambertian()));
-    // objects.push_back(new triangle(a, c, d, color_b, new lambertian()));
-    objects.push_back(new triangle(a, b, c, color_a, new lambertian()));
-    objects.push_back(new triangle(c, d, a, color_b, new lambertian()));
-    // objects.push_back(new triangle(d, c, e, color_b, new lambertian()));
-    // objects.push_back(new triangle(e, f, d, color_b, new lambertian()));
-
-    // objects.push_back(new triangle(g, a, d, color_b, new lambertian()));
-    // objects.push_back(new triangle(d, h, g, color_b, new lambertian()));
-    // objects.push_back(new triangle(h, d, f, color_a, new lambertian()));
-    // objects.push_back(new triangle(f, i, h, color_a, new lambertian()));
-    // vec3 a;
-    // vec3 b;
-    // vec3 c;
-    // vec3 d;
-    // for (double z = 0; z > -10; z -= 0.5) {
-    //     for (double x = -10; x <= 10; x += 0.1) {
-    //         cerr << x << "\n";
-    //     }
-    // }
-    
+    vec3 a;
+    vec3 b;
+    vec3 c;
+    vec3 d;
+    double width = 5;
+    double length = 5;
+    for (double z = 0; z > -10; z -= length) {
+        for (double x = -10; x <= 10; x += width) {
+            a = vec3(x, y, z - length);
+            b = vec3(x, y, z);
+            c = vec3(x + width, y, z);
+            d = vec3(x + width, y, z - length);
+            objects.push_back(new triangle(a, b, c, color_a, new lambertian()));
+            objects.push_back(new triangle(a, c, d, color_b, new lambertian()));
+        }
+    }
 }
 
 /**
@@ -362,7 +340,7 @@ int main(int argc, char* argv[]) {
 
     cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
     for (int j = image_height - 1; j >=0; j--) {
-        cerr << "\rScanlines done: " << j << ' ' << std::flush;
+        // cerr << "\rScanlines done: " << j << ' ' << std::flush;
         for (int i = 0; i < image_width; ++i) {
             if (jittering) {
                 color average = shoot_multiple_rays(i, j);
