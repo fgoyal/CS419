@@ -26,7 +26,7 @@ inline double random_double() {
  * @return the random double
  **/
 inline double random_double(double min, double max) {
-    return min + (max-min)*random_double();
+    return min + (max-min) * random_double();
 }
 
 /**
@@ -47,7 +47,7 @@ inline vec3 random_sphere() {
 
 inline vec3 random_in_unit_disk() {
     while (true) {
-        auto p = vec3(random_double(-1,1), random_double(-1,1), 0);
+        vec3 p = vec3(random_double(-1,1), random_double(-1,1), 0);
         if (p.length_squared() >= 1) continue;
         return p;
     }
@@ -55,7 +55,7 @@ inline vec3 random_in_unit_disk() {
 
 inline vec3 random_in_unit_sphere() {
     while (true) {
-        auto p = random_vec3(-1,1);
+        vec3 p = random_vec3(-1,1);
         if (p.length_squared() >= 1) continue;
         return p;
     }

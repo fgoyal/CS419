@@ -15,13 +15,20 @@ class plane : public objs {
          * @param normal the surface normal for the plane
          * @param kDiffuse the kDiffuse element for the Phong shading model
          */
-        plane(const point3& point, const vec3& normal, const color& kDiffuse) : a(point), n(normal), kD(kDiffuse) {}
+        plane(const point3& point, const vec3& normal, const color& kDiffuse, material* mat) : a(point), n(normal), kD(kDiffuse), m(mat) {}
         
         point3 point() const {
             return a;
         }
 
-        virtual color kDiffuse() const;
+        color kDiffuse() const {
+            return kD;
+        }
+
+        material* mat() const {
+            return m;
+        }
+
         virtual vec3 surface_normal(const point3 position) const;
         virtual bool ray_intersection(const ray& r, hit_record& rec) const;
         virtual aabb bounding_box() const;
@@ -30,11 +37,8 @@ class plane : public objs {
         point3 a;
         vec3 n;
         color kD;
+        material* m;
 };
-
-color plane::kDiffuse() const {
-    return kD;
-}
 
 vec3 plane::surface_normal(const point3 position) const {
     return unit_vector(n);
@@ -47,6 +51,7 @@ bool plane::ray_intersection(const ray& r, hit_record& rec) const {
     rec.p = r.at(t);
     rec.set_normal(r, unit_vector(n));
     rec.kD = kD;
+    rec.mat = m;
     return (t >= 0.0);
 }
 

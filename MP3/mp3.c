@@ -31,11 +31,11 @@ static bool perspective = false;
 static bool jittering = false;
 static const int fine_grid = 4;
 static int coarse_grid = (int) sqrt(fine_grid);
-const int max_depth = 10;
+const int max_depth = 50;
 
 // Image
 const static double aspect_ratio = 1.0 / 1.0;
-const static int image_width = 100;
+const static int image_width = 200;
 const static int image_height = static_cast<int>(image_width / aspect_ratio);
 
 // Camera
@@ -54,9 +54,10 @@ const camera cam = camera(eyepoint, viewDir, up, dir, image_width, image_height,
 // Colors
 const color s1_c = color(91,75,122)/255.0;
 const color s2_c = color(193,3,55)/255.0;
-const color s3_c = color(0.8, 0.8, 0.0);
+const color s3_c = color(0.7, 0.3, 0.3);
+const color g_c = color(1.0, 1.0, 1.0);
 const color t1_c = color(0.0470446,0.678865,0.679296);
-const color p_c = color(14, 153, 39)/255.0;
+const color p_c = color(0.8, 0.8, 0.0);
 const color sky = color(0.5, 0.7, 1.0);
 
 // Objects
@@ -65,19 +66,14 @@ const double sphere_radius = 0.5;
 vector<objs*> objects;
 bvh_node root;
 
-material* s1_m = new lambertian(color(0.8, 0.8, 0.0));
-material* s2_m = new metal(color(0.7, 0.3, 0.2));
-material* s3_m = new metal(color(0.7, 0.3, 0.2));
-material* t1_m = new lambertian(color(0.7, 0.3, 0.2));
-
-sphere* s1 = new sphere(point3(-0.2, -0.4,   -1), 0.3,  s1_c, s1_m);
-sphere* s2 = new sphere(point3( 0.4, -0.2,   -1), 0.3,  s2_c, s2_m);
-sphere* s3 = new sphere(point3( 0.3, -0.43, -0.7), 0.07, s3_c, s3_m);
-plane* p = new plane(point3(0, -0.5,1), vec3(0, -1, 0), p_c);
+sphere* s1 = new sphere(point3(-0.2, -0.4,   -1), 0.3,  s1_c, new mirror());
+sphere* s2 = new sphere(point3( 0.4, -0.2,   -1), 0.3,  g_c, new glass(1.5));
+sphere* s3 = new sphere(point3( 0.3, -0.43, -0.7), 0.07, s3_c, new lambertian());
+plane* p = new plane(point3(0, -0.5,0), vec3(0, -1, 0), p_c, new mirror());
 const vec3 a_1 = vec3(0.5, -0.8, -1);
-const vec3 b_1 = vec3(-0.25, -1.0, -0.7);
+const vec3 b_1 = vec3(0, -1.0, -0.7);
 const vec3 c_1 = vec3(0, 0.5, -0.7);
-triangle* t1 = new triangle(a_1, b_1, c_1, t1_c, t1_m);
+triangle* t1 = new triangle(a_1, b_1, c_1, t1_c, new lambertian());
 
 // Lighting and Shading
 const vec3 lightPosition = vec3(0.75, 0.75, 0.5);
@@ -100,7 +96,7 @@ const float shininess = 20;
  * @param kDiffuse base color for the object
  * @return shaded color
  */
-color phong_reflection(const ray& r, vec3 N, point3 position, vec3 kDiffuse) {
+color phong_reflection(vec3 N, point3 position, vec3 kDiffuse) {
     vec3 L = unit_vector(lightPosition - position); // light vector
     vec3 V = unit_vector(eyepoint - position);
     vec3 R = unit_vector(reflect(L, N));
@@ -130,21 +126,21 @@ color apply_shadows(color original, hit_record rec) {
     ray shadow_ray = ray(new_origin, lightPosition - rec.p);
     hit_record tmp;
     color shadow = original;
-    int i = 0;
-    // bool hit = root.ray_intersection(shadow_ray, tmp);
-    // if (hit) {
-    //     shadow = shade(shadow, 0.4);
-    // }
-    for (auto o : objects) {
-        if (i == 3) { // skip plane
-            break;
-        }
-        bool hit = o->ray_intersection(shadow_ray, tmp);
-        if (hit) {
-            shadow = shade(shadow, 0.4);
-        }
-        i++;
+    // int i = 0;
+    bool hit = root.ray_intersection(shadow_ray, tmp);
+    if (hit) {
+        shadow = shade(shadow, 0.4);
     }
+    // for (auto o : objects) {
+    //     if (i == 4) { // skip plane
+    //         break;
+    //     }
+    //     bool hit = o->ray_intersection(shadow_ray, tmp);
+    //     if (hit) {
+    //         shadow = shade(shadow, 0.4);
+    //     }
+    //     i++;
+    // }
     return shadow;
 }
 
@@ -154,12 +150,12 @@ color apply_shadows(color original, hit_record rec) {
  * @return the final color at the point after shading and shadows
  */
 color ray_color(const ray& r, int depth) {
+    if (depth <= 0) {
+        return sky;
+    }
+
     // hit_record rec;
     // bool hit = root.ray_intersection(r, rec);
-
-    // if (depth <= 0) {
-    //     return sky;
-    // }
 
     hit_record rec;
     hit_record tmp;
@@ -180,16 +176,14 @@ color ray_color(const ray& r, int depth) {
     if (hit_object) {
     // if (hit) {
         // ray scattered;
-        // color c;
-        // if (rec.mat->scatter(r, rec, c, scattered)) {
-        //     return c;
-        //     // return c * ray_color(scattered, depth - 1);
+        // if (rec.mat->scatter(r, rec, scattered)) {
+        //     return rec.kD * ray_color(scattered, depth - 1);
         // }
         // cerr << rec.normal << "\n";
         // return color(rec.normal.z(), rec.normal.z(), rec.normal.z());
         // return 0.5 * color(rec.normal.x() + 1, rec.normal.y() + 1, rec.normal.z() + 1);
-        to_return = phong_reflection(r, rec.normal, rec.p, rec.kD);
-        to_return = apply_shadows(to_return, rec);
+        to_return = phong_reflection(rec.normal, rec.p, rec.kD);
+        // to_return = apply_shadows(to_return, rec);
         return to_return;
     }  
 
@@ -264,7 +258,7 @@ void add_objects() {
     objects.push_back(s1);
     objects.push_back(s2);
     objects.push_back(s3);
-    objects.push_back(p);
+    // objects.push_back(p);
 
     // for (int i = 0; i < NUM_OBJECTS; i++) {
     //     point3 center = random_sphere();
@@ -273,7 +267,7 @@ void add_objects() {
     //     objects.push_back(randsphere);
     // }
     // cerr << "created object list\n";
-    // root = bvh_node(objects);
+    root = bvh_node(objects);
 }
 
 /**
@@ -281,10 +275,53 @@ void add_objects() {
  */
 void create_mesh() {
     color obj_color = color(1,0,0);
-    mesh obj = mesh("objs/cow.obj", obj_color, s1_m);
+    mesh obj = mesh("objs/cow.obj", obj_color, new lambertian());
     vector<objs*> mesh = obj.get_faces();
     root = bvh_node(mesh);
     cerr << "created root\n";
+}
+
+void generate_checkerboard(double y, color color_a, color color_b) {
+    // vec3 a = vec3(-0.5, y, -1);
+    // vec3 b = vec3(-0.5, y, 0);
+    // vec3 c = vec3(0.5, y, 0);
+    // vec3 d = vec3(0.5, y, -1);
+    // vec3 e = vec3(1, y, 0);
+    // vec3 f = vec3(1, y, -1);
+    // vec3 g = vec3(-0.5, y, -2);
+    // vec3 h = vec3(0.5, y, -2);
+    // vec3 i = vec3(1, y, -2);
+    vec3 a = vec3(-100, y, -10);
+    vec3 b = vec3(-10, y, 0);
+    vec3 c = vec3(10, y, 0);
+    vec3 d = vec3(100, y, -10);
+    vec3 e = vec3(20, y, 0);
+    vec3 f = vec3(20, y, -10);
+    vec3 g = vec3(-10, y, -20);
+    vec3 h = vec3(20, y, -20);
+    vec3 i = vec3(20, y, -20);
+    // objects.push_back(new triangle(a, b, c, color_a, new lambertian()));
+    // objects.push_back(new triangle(b, c, d, color_a, new lambertian()));
+    // objects.push_back(new triangle(a, c, d, color_b, new lambertian()));
+    objects.push_back(new triangle(a, b, c, color_a, new lambertian()));
+    objects.push_back(new triangle(c, d, a, color_b, new lambertian()));
+    // objects.push_back(new triangle(d, c, e, color_b, new lambertian()));
+    // objects.push_back(new triangle(e, f, d, color_b, new lambertian()));
+
+    // objects.push_back(new triangle(g, a, d, color_b, new lambertian()));
+    // objects.push_back(new triangle(d, h, g, color_b, new lambertian()));
+    // objects.push_back(new triangle(h, d, f, color_a, new lambertian()));
+    // objects.push_back(new triangle(f, i, h, color_a, new lambertian()));
+    // vec3 a;
+    // vec3 b;
+    // vec3 c;
+    // vec3 d;
+    // for (double z = 0; z > -10; z -= 0.5) {
+    //     for (double x = -10; x <= 10; x += 0.1) {
+    //         cerr << x << "\n";
+    //     }
+    // }
+    
 }
 
 /**
@@ -313,7 +350,9 @@ int main(int argc, char* argv[]) {
     srand(time(NULL));
     set_command_line_args(argc, argv);
 
+    generate_checkerboard(-0.5, color(1, 0, 0), color(0,0,1));
     add_objects(); // for spheres
+    
     // create_mesh();
     duration = (std::clock() - start) / (double) CLOCKS_PER_SEC;
     cerr << "\nduration to construct tree is: " << duration << "\n";

@@ -48,7 +48,7 @@ class sphere : public objs {
     public:
         point3 c;
         double rad;
-        vec3 kD;
+        color kD;
         aabb bbox;
         material* m;
 };
