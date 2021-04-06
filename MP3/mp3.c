@@ -39,21 +39,22 @@ const static int image_width = 100;
 const static int image_height = static_cast<int>(image_width / aspect_ratio);
 
 // Camera
-const float viewport_width = 2.0;
+const float viewport_width = 4.0;
 const float s = viewport_width / image_width;
 const vec3 direction = vec3(0, 0, -1);
 
 // const point3 eyepoint = point3(-0.5, 1.0, 1);
-const point3 eyepoint = point3(0,1,1);
+const point3 eyepoint = point3(0,0,0);
 const vec3 viewDir = point3(0, 0, -1);
 const vec3 up = vec3(0,1,0);
-double dir = 1.0;
+double dir = 2.0;
 
 const camera cam = camera(eyepoint, viewDir, up, dir, image_width, image_height, s);
 
 // Colors
 const color s1_c = color(91,75,122)/255.0;
 const color s2_c = color(193,3,55)/255.0;
+const color s3_c = color(0.8, 0.8, 0.0);
 const color t1_c = color(0.0470446,0.678865,0.679296);
 const color p_c = color(14, 153, 39)/255.0;
 const color sky = color(0.5, 0.7, 1.0);
@@ -66,11 +67,13 @@ bvh_node root;
 
 material* s1_m = new lambertian(color(0.8, 0.8, 0.0));
 material* s2_m = new metal(color(0.7, 0.3, 0.2));
+material* s3_m = new metal(color(0.7, 0.3, 0.2));
 material* t1_m = new lambertian(color(0.7, 0.3, 0.2));
 
-sphere* s1 = new sphere(point3(-0.2, 0, -1), 0.4, s1_c, s1_m);
-sphere* s2 = new sphere(point3(0.4,0,-0.5), 0.1, s2_c, s2_m);
-plane* p = new plane(point3(0, -1,0), vec3(0, -1, -0.1), p_c);
+sphere* s1 = new sphere(point3(-0.2, -0.4,   -1), 0.3,  s1_c, s1_m);
+sphere* s2 = new sphere(point3( 0.4, -0.2,   -1), 0.3,  s2_c, s2_m);
+sphere* s3 = new sphere(point3( 0.3, -0.43, -0.7), 0.07, s3_c, s3_m);
+plane* p = new plane(point3(0, -0.5,1), vec3(0, -1, 0), p_c);
 const vec3 a_1 = vec3(0.5, -0.8, -1);
 const vec3 b_1 = vec3(-0.25, -1.0, -0.7);
 const vec3 c_1 = vec3(0, 0.5, -0.7);
@@ -174,8 +177,8 @@ color ray_color(const ray& r, int depth) {
     }
     color to_return;
 
-    // if (hit_object) {
-    if (hit) {
+    if (hit_object) {
+    // if (hit) {
         // ray scattered;
         // color c;
         // if (rec.mat->scatter(r, rec, c, scattered)) {
@@ -257,9 +260,10 @@ color shoot_multiple_rays(int i, int j) {
  * Add the spheres, triangle, and plane into a list of objs
  */
 void add_objects() {
-    objects.push_back(t1);
+    // objects.push_back(t1);
     objects.push_back(s1);
     objects.push_back(s2);
+    objects.push_back(s3);
     objects.push_back(p);
 
     // for (int i = 0; i < NUM_OBJECTS; i++) {
