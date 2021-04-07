@@ -32,14 +32,14 @@ using std::numeric_limits;
 // --------------------------------------- VARIABLES --------------------------------------- //
 static bool perspective = false;
 static bool jittering = false;
-static const int fine_grid = 4;
+static const int fine_grid = 16;
 static int coarse_grid = (int) sqrt(fine_grid);
 const int max_depth = 50;
 double infinity = numeric_limits<double>::infinity();
 
 // Image
 const static double aspect_ratio = 1.0 / 1.0;
-const static int image_width = 100;
+const static int image_width = 150;
 const static int image_height = static_cast<int>(image_width / aspect_ratio);
 
 // Camera
@@ -91,9 +91,9 @@ const vec3 d_2 = vec3(-1, 1, -1.5);
 triangle* r1 = new triangle(a_2, b_2, c_2, white, new area_light(white));
 triangle* r2 = new triangle(a_2, c_2, d_2, white, new area_light(white));
 
-const vec3 a_3 = vec3(-1, 1, -0.5); // front
-const vec3 b_3 = vec3(1, 1, -0.5); // back
-const vec3 c_3 = vec3(0, 1, -1.5); // top
+const vec3 a_3 = vec3(-1, -0.49, -0.5); // front
+const vec3 b_3 = vec3(1, -0.49, -0.5); // back
+const vec3 c_3 = vec3(0, -0.49, -1.5); // top
 triangle* r3 = new triangle(c_3, b_3, a_3, white, new area_light(white));
 
 // Lighting and Shading
@@ -196,22 +196,23 @@ color ray_color(const ray& r, int depth) {
     // cerr << hit << " " << rec.t << " (" << rec.kD << ")\n";
     // if (hit_object) {
     if (hit) {
-        // ray scattered;
-        // color emitted = rec.mat->emitted();
-        // // cerr << emitted << "\n";
-        // if (rec.mat->scatter(r, rec, scattered)) {
-            // to_return = emitted + rec.kD * ray_color(scattered, depth - 1);
-        // } else {
-            // return emitted;
-        // }
+        ray scattered;
+        color emitted = rec.mat->emitted();
+        // cerr << emitted << "\n";
+        if (rec.mat->scatter(r, rec, scattered)) {
+            to_return = emitted + rec.kD * ray_color(scattered, depth - 1);
+        } else {
+            return emitted;
+        }
         // cerr << rec.normal << "\n";
         // return color(rec.normal.z(), rec.normal.z(), rec.normal.z());
         // return 0.5 * color(rec.normal.x() + 1, rec.normal.y() + 1, rec.normal.z() + 1);
-        to_return = phong_reflection(rec.normal, rec.p, rec.kD);
+        // to_return = phong_reflection(rec.normal, rec.p, rec.kD);
         // to_return = apply_shadows(to_return, rec);
         return to_return;
     }  
     return sky;
+    // return black;
     // return color(0.1, 0.1, 0.1);
 }
 
@@ -284,8 +285,9 @@ void add_objects() {
     objects.push_back(s2);
     objects.push_back(s3);
     // objects.push_back(light);
-    // objects.push_back(r1);
-    // objects.push_back(r2);
+    objects.push_back(r1);
+    objects.push_back(r2);
+    objects.push_back(r3);
     // objects.push_back(p);
 
     // for (int i = 0; i < NUM_OBJECTS; i++) {
