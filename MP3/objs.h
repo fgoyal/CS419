@@ -67,6 +67,8 @@ class objs {
          * @return the bounding box
          **/
         virtual aabb bounding_box() const = 0;
+
+        virtual std::string type() const = 0;
 };
 
 #endif

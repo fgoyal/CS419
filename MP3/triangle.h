@@ -42,6 +42,10 @@ class triangle : public objs {
             return bbox;
         }
 
+        std::string type() const {
+            return "triangle";
+        }
+
         // virtual color kDiffuse() const;
         vec3 surface_normal(const point3 position) const;
         vec3 interpolated_normal(const point3 position) const;
@@ -113,9 +117,9 @@ bool triangle::ray_intersection(const ray& r, hit_record& rec, double tmin, doub
         return false;
     }
     double t = f * dot(e2, x);
-    // if (t <= tmin || t >= tmax) {
-    //     return false;
-    // }
+    if (t <= tmin || t >= tmax) {
+        return false;
+    }
     rec.t = t;
     rec.p = r.at(t);
     // rec.set_normal(r, interpolated_normal(rec.p));
@@ -156,6 +160,10 @@ vec3 triangle::barycentric_coordinates(const point3 position) const {
     double b2 = area(a, position, c) / T;
     double b3 = area(a, b, position) / T;
     return vec3(b1, b2, b3);
+}
+
+inline ostream& operator<<(ostream &out, const triangle& t) {
+    return out << "triangle: " << t.kDiffuse();
 }
 
 #endif

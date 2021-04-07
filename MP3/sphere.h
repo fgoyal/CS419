@@ -40,6 +40,10 @@ class sphere : public objs {
             return bbox;
         }
 
+        std::string type() const {
+            return "sphere";
+        }
+
         // virtual color kDiffuse() const;
         virtual vec3 surface_normal(const point3 position) const;
         virtual bool ray_intersection(const ray& r, hit_record& rec, double tmin, double tmax) const;
@@ -94,6 +98,10 @@ aabb sphere::create_aabb() const {
         c - vec3(rad, rad, rad),
         c + vec3(rad, rad, rad)
     );
+}
+
+inline ostream& operator<<(ostream &out, const sphere& s) {
+    return out << "sphere: " << s.center();
 }
 
 #endif

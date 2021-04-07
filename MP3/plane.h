@@ -29,6 +29,10 @@ class plane : public objs {
             return m;
         }
 
+        std::string type() const {
+            return "plane";
+        }
+
         virtual vec3 surface_normal(const point3 position) const;
         virtual bool ray_intersection(const ray& r, hit_record& rec, double tmin, double tmax) const;
         virtual aabb bounding_box() const;

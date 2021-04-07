@@ -8,6 +8,10 @@ class material {
         virtual bool scatter(
             const ray& r, const hit_record& rec, ray& scattered
         ) const = 0;
+
+        virtual color emitted() const {
+            return color(0, 0, 0);
+        }
 };
 
 class lambertian : public material {
@@ -68,6 +72,19 @@ class glass : public material {
             r0 = r0 * r0;
             return r0 + (1 - r0) * pow((1 - cosine), 5);
         }
+};
+
+class area_light : public material {
+    public: 
+        area_light(color emit_color) : c(emit_color) {}
+        virtual bool scatter(const ray& r, const hit_record& rec, ray& scattered) const override{
+            return false;
+        }
+        virtual color emitted() const override {
+            return c;
+        }
+    public:
+        color c;
 };
 
 

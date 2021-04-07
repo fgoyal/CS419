@@ -17,6 +17,10 @@ class bvh_node : public objs {
         bvh_node() {};
         bvh_node(const vector<objs*>& objects);
 
+        std::string type() const {
+            return "bvh node";
+        }
+
         virtual color kDiffuse() const;
         virtual vec3 surface_normal(const point3 position) const;
         virtual bool ray_intersection(const ray& r, hit_record& rec, double tmin, double tmax) const;
@@ -39,23 +43,23 @@ color bvh_node::kDiffuse() const {
  * This function should never be used
  */
 vec3 bvh_node::surface_normal(const point3 position) const {
-    std::cerr << "bvh node surface normal\n";
+    // std::cerr << "bvh node surface normal\n";
     return vec3(-10.0,-10.0,-10.0);
 }
 
 
 bool bvh_node::ray_intersection(const ray& r, hit_record& rec, double tmin, double tmax) const {
-    cerr << "intersection " << tmin << " " << tmax << "\n";
-    cerr << "box: " << bbox << "\n";
+    // cerr << "intersection " << tmin << " " << tmax << "\n";
+    // cerr << "box: " << bbox << "\n";
     if (!bbox.ray_intersection(r, tmin, tmax)) {
-        cerr << "no intersection\n";
+        // cerr << "no intersection\n";
         return false;
     }
-    cerr << "\n";
-    cerr << "left ";
+    // cerr << "\n";
+    // cerr << "left ";
     double hit_left = left->ray_intersection(r, rec, tmin, tmax);
     // double hit_right = right->ray_intersection(r, rec, tmin, hit_left ? rec.t : tmax);
-    cerr << "right ";
+    // cerr << "right ";
     double hit_right = right->ray_intersection(r, rec, tmin, tmax);
     return hit_left || hit_right;
 }
@@ -168,19 +172,19 @@ bvh_node::bvh_node(const vector<objs*>& objects) {
         } else {
             right = new bvh_node(right_split);
         }
-        cerr << "num left objects: " << left_split.size() << "\n";
-        cerr << "num right objects: " << right_split.size() << "\n";
+        // cerr << "num left objects: " << left_split.size() << "\n";
+        // cerr << "num right objects: " << right_split.size() << "\n";
     }
 
     
 
     aabb box_left = left->bounding_box();
-    cerr << "left - " << box_left << "\n";
+    // cerr << "left - " << box_left << "\n";
     aabb box_right = right->bounding_box();
-    cerr << "right - " << box_right << "\n";
+    // cerr << "right - " << box_right << "\n";
     
     bbox = surrounding_box(box_left, box_right);
-    cerr << "surrounding - " << bbox << "\n\n";
+    // cerr << "surrounding - " << bbox << "\n\n";
 }
 
 #endif

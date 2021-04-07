@@ -31,14 +31,14 @@ using std::numeric_limits;
 // --------------------------------------- VARIABLES --------------------------------------- //
 static bool perspective = false;
 static bool jittering = false;
-static const int fine_grid = 4;
+static const int fine_grid = 64;
 static int coarse_grid = (int) sqrt(fine_grid);
 const int max_depth = 50;
 double infinity = numeric_limits<double>::infinity();
 
 // Image
 const static double aspect_ratio = 1.0 / 1.0;
-const static int image_width = 150;
+const static int image_width = 400;
 const static int image_height = static_cast<int>(image_width / aspect_ratio);
 
 // Camera
@@ -56,12 +56,13 @@ const camera cam = camera(eyepoint, viewDir, up, dir, image_width, image_height,
 
 // Colors
 const color s1_c = color(91,75,122)/255.0;
-const color s2_c = color(193,3,55)/255.0;
-const color s3_c = color(0.7, 0.3, 0.3);
-const color g_c = color(1.0, 1.0, 1.0);
+const color orange = color(219, 121, 59)/255.0;
+const color pink = color(0.7, 0.3, 0.3);
+const color white = color(1.0, 1.0, 1.0);
 const color t1_c = color(0.0470446,0.678865,0.679296);
 const color p_c = color(0.8, 0.8, 0.0);
 const color sky = color(0.5, 0.7, 1.0);
+const color black = color(0, 0, 0);
 
 // Objects
 const int NUM_OBJECTS = 10;
@@ -69,13 +70,13 @@ const double sphere_radius = 0.5;
 vector<objs*> objects;
 bvh_node root;
 
-sphere* s1 = new sphere(point3(-0.2, -0.4,   -1), 0.3,  s1_c, new mirror());
-sphere* s2 = new sphere(point3( 0.4, -0.2,   -1), 0.3,  g_c, new glass(1.5));
-sphere* s3 = new sphere(point3( 0.3, -0.43, -0.7), 0.07, s3_c, new lambertian());
-plane* p = new plane(point3(0, -0.5,0), vec3(0, -1, 0), p_c, new mirror());
-const vec3 a_1 = vec3(0.5, -0.8, -1);
+sphere* s1 = new sphere(point3(-0.2, -0.3,   -1), 0.3,  white, new mirror());
+sphere* s2 = new sphere(point3( 0.4, -0.2,   -1), 0.3,  white, new glass(1.5));
+sphere* s3 = new sphere(point3( 0.3, -0.43, -0.7), 0.07, pink, new lambertian());
+plane* p = new plane(point3(0, -0.5,0), vec3(0, -1, 0), white, new mirror());
+const vec3 a_1 = vec3(0.3, -0.8, -1);
 const vec3 b_1 = vec3(0, -1.0, -0.7);
-const vec3 c_1 = vec3(0, 0.5, -0.7);
+const vec3 c_1 = vec3(-0.1, 0.2, -0.7);
 triangle* t1 = new triangle(a_1, b_1, c_1, t1_c, new lambertian());
 
 // Lighting and Shading
@@ -154,11 +155,11 @@ color apply_shadows(color original, hit_record rec) {
  */
 color ray_color(const ray& r, int depth) {
     if (depth <= 0) {
-        return sky;
+        return black;
     }
 
     // hit_record rec;
-    // bool hit = root.ray_intersection(r, rec, 0.00, infinity);
+    // bool hit = root.ray_intersection(r, rec, -1000000, infinity);
 
     hit_record rec;
     hit_record tmp;
@@ -179,8 +180,9 @@ color ray_color(const ray& r, int depth) {
     if (hit_object) {
     // if (hit) {
         ray scattered;
+        color emitted = rec.mat->emitted();
         if (rec.mat->scatter(r, rec, scattered)) {
-            return rec.kD * ray_color(scattered, depth - 1);
+            to_return = rec.kD * ray_color(scattered, depth - 1);
         }
         // cerr << rec.normal << "\n";
         // return color(rec.normal.z(), rec.normal.z(), rec.normal.z());
@@ -271,6 +273,9 @@ void add_objects() {
     // }
     // cerr << "created object list\n";
     cerr << "OBJECTS SIZE: " << objects.size() << "\n";
+    for (auto o : objects) {
+        cerr << o->type() << ": " << o->kDiffuse() << "\n";
+    }
     root = bvh_node(objects);
     // cerr << "root bbox: " << root.bounding_box() << "\n";
 }
@@ -291,10 +296,10 @@ void generate_checkerboard(double y, color color_a, color color_b) {
     vec3 b;
     vec3 c;
     vec3 d;
-    double width = 5;
-    double length = 5;
+    double width = 1;
+    double length = 1;
     for (double z = 0; z > -10; z -= length) {
-        for (double x = -10; x <= 10; x += width) {
+        for (double x = -10; x < 10; x += width) {
             a = vec3(x, y, z - length);
             b = vec3(x, y, z);
             c = vec3(x + width, y, z);
@@ -331,7 +336,7 @@ int main(int argc, char* argv[]) {
     srand(time(NULL));
     set_command_line_args(argc, argv);
 
-    generate_checkerboard(-0.5, color(1, 0, 0), color(0,0,1));
+    generate_checkerboard(-0.5, color(255, 228, 156)/255.0, color(0.2,0.2,0.2));
     add_objects(); // for spheres
     
     // create_mesh();
@@ -340,7 +345,7 @@ int main(int argc, char* argv[]) {
 
     cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
     for (int j = image_height - 1; j >=0; j--) {
-        // cerr << "\rScanlines done: " << j << ' ' << std::flush;
+        cerr << "\rScanlines done: " << j << ' ' << std::flush;
         for (int i = 0; i < image_width; ++i) {
             if (jittering) {
                 color average = shoot_multiple_rays(i, j);

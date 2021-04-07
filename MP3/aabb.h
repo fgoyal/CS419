@@ -43,28 +43,17 @@ class aabb {
  * @return true or false depending on if it intersects
  **/
 bool aabb::ray_intersection(const ray& r, double tmin, double tmax) const {
-    // for (int i = 0; i < 3; i++) {
-    //     double a = (minimum[i] - r.origin()[i]) / r.direction()[i];
-    //     double b = (maximum[i] - r.origin()[i]) / r.direction()[i];
-    //     // tmin = fmax(tmin, fmin(a,b));
-    //     // tmax = fmin(tmax, fmax(a,b));
-    //     // if (tmax <= tmin) {
-    //     if (fmax(a, b) <= fmin(a, b)) {
-    //         return false;
-    //     }
-    // }
-    // return true;
-    for (int a = 0; a < 3; a++) {
-                auto t0 = fmin((minimum[a] - r.origin()[a]) / r.direction()[a],
-                               (maximum[a] - r.origin()[a]) / r.direction()[a]);
-                auto t1 = fmax((minimum[a] - r.origin()[a]) / r.direction()[a],
-                               (maximum[a] - r.origin()[a]) / r.direction()[a]);
-                tmin = fmax(t0, tmin);
-                tmax = fmin(t1, tmax);
-                if (tmax <= tmin)
-                    return false;
-            }
-            return true;
+    for (int i = 0; i < 3; i++) {
+        double a = (minimum[i] - r.origin()[i]) / r.direction()[i];
+        double b = (maximum[i] - r.origin()[i]) / r.direction()[i];
+        tmin = fmax(tmin, fmin(a,b));
+        tmax = fmin(tmax, fmax(a,b));
+        if (tmax <= tmin) {
+        // if (fmax(a, b) <= fmin(a, b)) {
+            return false;
+        }
+    }
+    return true;
 
 }
 
