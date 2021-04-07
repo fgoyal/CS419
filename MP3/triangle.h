@@ -117,7 +117,7 @@ bool triangle::ray_intersection(const ray& r, hit_record& rec, double tmin, doub
         return false;
     }
     double t = f * dot(e2, x);
-    if (t <= tmin || t >= tmax) {
+    if (t < tmin || t > tmax) {
         return false;
     }
     rec.t = t;
@@ -126,7 +126,7 @@ bool triangle::ray_intersection(const ray& r, hit_record& rec, double tmin, doub
     rec.set_normal(r, surface_normal(rec.p));
     rec.kD = kD;
     rec.mat = m;
-    return (t >= 0.0);
+    return true;
 }
 
 aabb triangle::create_aabb() const {
@@ -137,6 +137,21 @@ aabb triangle::create_aabb() const {
     double minz = fmin(fmin(a[2], b[2]), c[2]);
     double maxz = fmax(fmax(a[2], b[2]), c[2]);
 
+    double epsilon = 0.0000001;
+    if (minx == maxx) {
+        minx -= epsilon;
+        maxx += epsilon;
+    }
+
+    if (miny == maxy) {
+        miny -= epsilon;
+        maxy += epsilon;
+    }
+
+    if (minz == maxz) {
+        minz -= epsilon;
+        maxz += epsilon;
+    }
     return aabb(vec3(minx, miny, minz), vec3(maxx, maxy, maxz));
 }
 

@@ -10,6 +10,7 @@
 #include "objs.h"
 #include "plane.h"
 #include "sphere.h"
+#include "rectangle.h"
 #include "triangle.h"
 #include "aabb.h"
 #include "bvh_node.h"
@@ -64,6 +65,7 @@ const color yellow = color(0.8, 0.8, 0.0);
 const color sky = color(0.5, 0.7, 1.0);
 const color black = color(0.1, 0.1, 0.1);
 const color gray = color(0.8, 0.8, 0.8);
+const color bright_white = color(4, 4, 4);
 
 // Objects
 const int NUM_OBJECTS = 10;
@@ -74,12 +76,25 @@ bvh_node root;
 sphere* s1 = new sphere(point3(-0.2, -0.3,   -1), 0.3,  gray, new mirror(0.05));
 sphere* s2 = new sphere(point3( 0.4, -0.2,   -1), 0.3,  white, new glass(1.5));
 sphere* s3 = new sphere(point3( 0.3, -0.43, -0.7), 0.07, pink, new lambertian());
+sphere* light = new sphere(point3(-0.2, 0.7, -1), 0.3,  bright_white, new area_light(bright_white));
+// rectangle* r1 = new rectangle(-0.5, 0.5, -0.5, -1, 0, bright_white, new lambertian());
 plane* p = new plane(point3(0, -0.5,0), vec3(0, -1, 0), white, new lambertian());
 const vec3 a_1 = vec3(-0.3, -0.8, -0.5); // front
 const vec3 b_1 = vec3(-0.8, -0.6, -1); // back
 const vec3 c_1 = vec3(-0.4, 0.2, -0.7); // top
 triangle* t1 = new triangle(a_1, b_1, c_1, blue, new lambertian());
-sphere* light = new sphere(point3(0.4, 0.5, -1), 0.1, color(4,4,4), new area_light(white));
+
+const vec3 a_2 = vec3(-1, -0.2, -1.5); // front
+const vec3 b_2 = vec3(1, -0.2, -1.5); // back
+const vec3 c_2 = vec3(1, 1, -1.5); // top
+const vec3 d_2 = vec3(-1, 1, -1.5);
+triangle* r1 = new triangle(a_2, b_2, c_2, white, new area_light(white));
+triangle* r2 = new triangle(a_2, c_2, d_2, white, new area_light(white));
+
+const vec3 a_3 = vec3(-1, 1, -0.5); // front
+const vec3 b_3 = vec3(1, 1, -0.5); // back
+const vec3 c_3 = vec3(0, 1, -1.5); // top
+triangle* r3 = new triangle(c_3, b_3, a_3, white, new area_light(white));
 
 // Lighting and Shading
 const vec3 lightPosition = vec3(0.75, 0.75, 0.5);
@@ -160,44 +175,44 @@ color ray_color(const ray& r, int depth) {
         return black;
     }
 
-    // hit_record rec;
-    // bool hit = root.ray_intersection(r, rec, -1000000, infinity);
-
     hit_record rec;
-    hit_record tmp;
-    bool hit;
-    bool hit_object = false;
-    double closest = std::numeric_limits<double>::infinity();
+    bool hit = root.ray_intersection(r, rec, 0.0001, infinity);
 
-    for (auto o : objects) {
-        hit = o->ray_intersection(r, tmp, 0.001, infinity);
-        if (hit && tmp.t <= closest) {
-            hit_object = true;
-            closest = tmp.t;
-            rec = tmp;
-        }
-    }
+    // hit_record rec;
+    // hit_record tmp;
+    // bool hit;
+    // bool hit_object = false;
+    // double closest = std::numeric_limits<double>::infinity();
+
+    // for (auto o : objects) {
+    //     hit = o->ray_intersection(r, tmp, 0.001, infinity);
+    //     if (hit && tmp.t <= closest) {
+    //         hit_object = true;
+    //         closest = tmp.t;
+    //         rec = tmp;
+    //     }
+    // }
     color to_return;
     // cerr << hit << " " << rec.t << " (" << rec.kD << ")\n";
-    if (hit_object) {
-    // if (hit) {
-        ray scattered;
+    // if (hit_object) {
+    if (hit) {
+        // ray scattered;
         // color emitted = rec.mat->emitted();
-        // cerr << emitted << "\n";
-        if (rec.mat->scatter(r, rec, scattered)) {
-            to_return = rec.kD * ray_color(scattered, depth - 1);
+        // // cerr << emitted << "\n";
+        // if (rec.mat->scatter(r, rec, scattered)) {
+            // to_return = emitted + rec.kD * ray_color(scattered, depth - 1);
         // } else {
-        //     return emitted;
-        }
+            // return emitted;
+        // }
         // cerr << rec.normal << "\n";
         // return color(rec.normal.z(), rec.normal.z(), rec.normal.z());
         // return 0.5 * color(rec.normal.x() + 1, rec.normal.y() + 1, rec.normal.z() + 1);
-        // to_return = phong_reflection(rec.normal, rec.p, rec.kD);
+        to_return = phong_reflection(rec.normal, rec.p, rec.kD);
         // to_return = apply_shadows(to_return, rec);
         return to_return;
     }  
-
     return sky;
+    // return color(0.1, 0.1, 0.1);
 }
 
 /**
@@ -269,6 +284,8 @@ void add_objects() {
     objects.push_back(s2);
     objects.push_back(s3);
     // objects.push_back(light);
+    // objects.push_back(r1);
+    // objects.push_back(r2);
     // objects.push_back(p);
 
     // for (int i = 0; i < NUM_OBJECTS; i++) {

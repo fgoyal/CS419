@@ -58,9 +58,9 @@ bool bvh_node::ray_intersection(const ray& r, hit_record& rec, double tmin, doub
     // cerr << "\n";
     // cerr << "left ";
     double hit_left = left->ray_intersection(r, rec, tmin, tmax);
-    // double hit_right = right->ray_intersection(r, rec, tmin, hit_left ? rec.t : tmax);
+    double hit_right = right->ray_intersection(r, rec, tmin, hit_left ? rec.t : tmax);
     // cerr << "right ";
-    double hit_right = right->ray_intersection(r, rec, tmin, tmax);
+    // double hit_right = right->ray_intersection(r, rec, tmin, tmax);
     return hit_left || hit_right;
 }
 

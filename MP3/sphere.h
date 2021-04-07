@@ -101,7 +101,7 @@ aabb sphere::create_aabb() const {
 }
 
 inline ostream& operator<<(ostream &out, const sphere& s) {
-    return out << "sphere: " << s.center();
+    return out << s.type() << ": " << s.center();
 }
 
 #endif
