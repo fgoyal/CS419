@@ -6,6 +6,7 @@
 #include "ray.h"
 #include "aabb.h"
 #include "material.h"
+#include "triangle.h"
 
 class rectangle : public objs {
     public: 
@@ -14,7 +15,9 @@ class rectangle : public objs {
          * @param a_t, b_t, c_t: the three edge points of the triangle
          * @param kDiffuse the kDiffuse element for the Phong shading model
          */
-        rectangle(const vec3& a_, const vec3& b_, const vec3& c_, const vec3& d_, const color& kDiffuse, material* mat) : a(a_), b(b_), c(c_), d(d_), kD(kDiffuse), m(mat) {
+        rectangle(const vec3& a, const vec3& b, const vec3& c, const vec3& d, const color& kDiffuse, material* mat) : kD(kDiffuse), m(mat) {
+            t1 = new triangle(a, b, c, kDiffuse, mat);
+            t2 = new triangle(a, c, d, kDiffuse, mat);
             bbox = create_aabb();
         }
         
@@ -41,39 +44,25 @@ class rectangle : public objs {
 
     public:
         vec3 a,b,c,d;
+        triangle* t1;
+        triangle* t2;
         color kD;
         aabb bbox;
         material* m;
 };
 
 vec3 rectangle::surface_normal(const point3 position) const {
-    return vec3(0,1,0);
+    return t1->surface_normal(position);
 }
 
 bool rectangle::ray_intersection(const ray& r, hit_record& rec, double tmin, double tmax) const {
-    // double t = (k - r.origin().y()) / r.direction().y();
-    // if (t < tmin || t > tmax) {
-    //     return false;
-    // }
-
-    // double x = r.origin().x() + t * r.direction().x();
-    // double z = r.origin().z() + t * r.direction().z();
-
-    // if (x < x0 || x > x1 || z < z0 || z > z1) {
-    //     return false;
-    // }
-
-    // rec.t = t;
-    // rec.p = r.at(t);
-    // rec.set_normal(r, surface_normal(rec.p));
-    // rec.kD = kD;
-    // rec.mat = m;
-    return true;
+    bool t1_intersect = t1->ray_intersection(r, rec, tmin, tmax);
+    bool t2_intersect = t2->ray_intersection(r, rec, tmin, tmax);
+    return t1_intersect || t2_intersect;
 }
 
 aabb rectangle::create_aabb() const {
-    // return aabb(vec3(x0, k - 0.0001, z0), vec3(x1, k + 0.0001, z1));
-    return aabb(a, b);
+    return surrounding_box(t1->bounding_box(), t2->bounding_box());
 }
 
 inline ostream& operator<<(ostream &out, const rectangle& t) {

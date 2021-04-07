@@ -88,13 +88,14 @@ const vec3 a_2 = vec3(-1, -0.2, -1.5); // front
 const vec3 b_2 = vec3(1, -0.2, -1.5); // back
 const vec3 c_2 = vec3(1, 1, -1.5); // top
 const vec3 d_2 = vec3(-1, 1, -1.5);
-triangle* r1 = new triangle(a_2, b_2, c_2, white, new area_light(white));
-triangle* r2 = new triangle(a_2, c_2, d_2, white, new area_light(white));
+// triangle* r1 = new triangle(a_2, b_2, c_2, white, new area_light(white));
+// triangle* r2 = new triangle(a_2, c_2, d_2, white, new area_light(white));
+rectangle* r1 = new rectangle(a_2, b_2, c_2, d_2, white, new area_light(white));
 
 const vec3 a_3 = vec3(-1, -0.49, -0.5); // front
 const vec3 b_3 = vec3(1, -0.49, -0.5); // back
 const vec3 c_3 = vec3(0, -0.49, -1.5); // top
-triangle* r3 = new triangle(c_3, b_3, a_3, white, new area_light(white));
+// triangle* r3 = new triangle(c_3, b_3, a_3, white, new area_light(white));
 
 // Lighting and Shading
 const vec3 lightPosition = vec3(0.75, 0.75, 0.5);
@@ -286,8 +287,8 @@ void add_objects() {
     objects.push_back(s3);
     // objects.push_back(light);
     objects.push_back(r1);
-    objects.push_back(r2);
-    objects.push_back(r3);
+    // objects.push_back(r2);
+    // objects.push_back(r3);
     // objects.push_back(p);
 
     // for (int i = 0; i < NUM_OBJECTS; i++) {
