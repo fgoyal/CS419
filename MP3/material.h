@@ -28,11 +28,14 @@ class lambertian : public material {
 
 class mirror : public material {
     public: 
+        mirror(double f) : fuzz(f < 1 ? f : 1) {}
         virtual bool scatter(const ray& r, const hit_record& rec, ray& scattered) const override{
             vec3 reflected = reflect(unit_vector(r.direction()), rec.normal);
-            scattered = ray(rec.p, reflected);
+            scattered = ray(rec.p, reflected + fuzz * random_in_unit_sphere());
             return (dot(scattered.direction(), rec.normal) > 0);
         }
+    public:
+        double fuzz;
 };
 
 class glass : public material {
