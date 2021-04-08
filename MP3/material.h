@@ -30,7 +30,7 @@ class mirror : public material {
     public: 
         mirror(double f) : fuzz(f < 1 ? f : 1) {}
         virtual bool scatter(const ray& r, const hit_record& rec, ray& scattered) const override{
-            vec3 reflected = reflect(unit_vector(r.direction()), rec.normal);
+            vec3 reflected = reflect(r.direction(), rec.normal);
             scattered = ray(rec.p, reflected + fuzz * random_in_unit_sphere());
             return (dot(scattered.direction(), rec.normal) > 0);
         }
@@ -43,25 +43,24 @@ class glass : public material {
         glass(double index) : ior(index) {}
         virtual bool scatter(const ray& r, const hit_record& rec, ray& scattered) const override{
             double refraction_ratio;
+            vec3 n = rec.normal;
             if (dot(r.direction(), rec.normal) < 0) {
                 refraction_ratio = 1.0 / ior;
             } else {
                 refraction_ratio = ior;
             }
 
-            vec3 unit_direction = unit_vector(r.direction());
-            double cos_theta = fmin(dot(-unit_direction, rec.normal), 1.0);
+            vec3 unit_direction = r.direction();
+            double cos_theta = fmin(dot(-unit_direction, n), 1.0);
             double sin_theta = sqrt(1.0 - cos_theta * cos_theta);
 
             bool cant_refract = refraction_ratio * sin_theta > 1.0;
             vec3 direction;
-
             if (cant_refract || reflectance(cos_theta, refraction_ratio) > random_double()) {
-                direction = reflect(unit_direction, rec.normal);
+                direction = reflect(unit_direction, n);
             } else {
-                direction = refract(unit_direction, rec.normal, refraction_ratio);
+                direction = refract(unit_direction, n, refraction_ratio);
             }
-            // vec3 refracted = refract(unit_vector(r.direction()), rec.normal, refraction_ratio);
             scattered = ray(rec.p, direction);
             return true;
         }

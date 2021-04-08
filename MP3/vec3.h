@@ -156,4 +156,8 @@ inline vec3 vec_clamp_min(vec3 v, double min) {
                 clip_min(v.e[2], min));
 }
 
+inline vec3 vec_sqrt(vec3 v) {
+    return vec3(sqrt(v.e[0]), sqrt(v.e[1]), sqrt(v.e[2]));
+}
+
 #endif

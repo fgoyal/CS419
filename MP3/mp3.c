@@ -32,7 +32,7 @@ using std::numeric_limits;
 // --------------------------------------- VARIABLES --------------------------------------- //
 static bool perspective = false;
 static bool jittering = false;
-static const int fine_grid = 64;
+static const int fine_grid = 225;
 static int coarse_grid = (int) sqrt(fine_grid);
 const int max_depth = 50;
 double infinity = numeric_limits<double>::infinity();
@@ -61,7 +61,7 @@ const color orange      = color(219, 121,  59) / 255.0;
 const color pink        = color(201,  81,  81) / 255.0;
 const color blue        = color( 12, 173, 173) / 255.0;
 const color yellow      = color(255, 247, 163) / 255.0;
-const color sky         = color(127, 195, 227) / 255.0;
+const color sky         = color(173, 225, 255) / 255.0;
 const color black       = color(0.0, 0.0, 0.0);
 const color dark_gray   = color(0.2, 0.2, 0.2);
 const color light_gray  = color(0.8, 0.8, 0.8);
@@ -86,6 +86,19 @@ const vec3 iSpecular = vec3(1,1,1);
 const float shininess = 20;
 
 // --------------------------------------- FUNCTIONS --------------------------------------- //
+
+/**
+ * Use gamma correction to fix the intensities of the color
+ * @param c: the color to gamma correct
+ * @return the corrected color
+ */
+color gamma_correction(color& c) {
+    double ratio = 1.0 / fine_grid;
+    color output = c * ratio;
+    output = vec_sqrt(output);
+    output = vec_clamp(output, 0.0, 1.0);
+    return output;
+}
 
 /**
  * The color at the position as determined by the Phong reflection model's diffuse shading
@@ -141,7 +154,7 @@ color ray_color(const ray& r, int depth) {
     }
 
     hit_record rec;
-    bool hit = root.ray_intersection(r, rec, 0.0001, infinity);
+    bool hit = root.ray_intersection(r, rec, 0.001, infinity);
 
     color to_return;
     if (hit) {
@@ -156,8 +169,8 @@ color ray_color(const ray& r, int depth) {
         // to_return = apply_shadows(to_return, rec);
         return to_return;
     }  
-    // return sky;
-    return black;
+    return sky;
+    // return dark_gray;
 }
 
 /**
@@ -224,12 +237,14 @@ color shoot_multiple_rays(int i, int j) {
  * Add the spheres, triangle, and plane into a list of objs
  */
 void add_objects() {
-    vec3 a_1 = vec3(-0.3, -0.8, -0.5); // front
+    // scene 1
+    vec3 a_1 = vec3(-0.3, -0.6, -0.5); // front
     vec3 b_1 = vec3(-0.8, -0.6, -1); // back
     vec3 c_1 = vec3(-0.4, 0.2, -0.7); // top
-    objects.push_back(new triangle(a_1, b_1, c_1, blue, new lambertian()));
+    objects.push_back(new triangle(a_1, b_1, c_1, blue, new mirror(0.05)));
     objects.push_back(new sphere(point3(-0.2, -0.3,   -1), 0.3,  light_gray, new mirror(0.05)));
-    objects.push_back(new sphere(point3( 0.4, -0.2,   -1), 0.3,  white, new glass(1.5)));
+    objects.push_back(new sphere(point3( 0.4, -0.3,   -1), 0.2,  white, new glass(1.5)));
+    objects.push_back(new sphere(point3( 0.8, -0.3,   -1.5), 0.1,  orange, new lambertian()));
     objects.push_back(new sphere(point3( 0.3, -0.43, -0.7), 0.07, pink, new lambertian()));
     // objects.push_back(new plane(point3(0, -0.5,0), vec3(0, -1, 0), white, new lambertian()));
 }
@@ -241,7 +256,7 @@ void add_random_spheres() {
     for (int i = 0; i < NUM_OBJECTS; i++) {
         point3 center = random_sphere();
         color c = random_vec3(0.0, 1.0);
-        sphere* randsphere = new sphere(center, sphere_radius, c, s1_m);
+        sphere* randsphere = new sphere(center, sphere_radius, c, new lambertian());
         objects.push_back(randsphere);
     }
 }
@@ -276,6 +291,16 @@ void add_area_lights() {
     c = vec3(right + space + width, bottom, front); // bottom right
     d = vec3(right + space, bottom, back); // bottom left
     objects.push_back(new rectangle(a, b, c, d, white, new area_light(white)));
+
+// vec3 a_1 = vec3(-0.3, -0.8, -0.5); // front
+//     vec3 b_1 = vec3(-0.8, -0.6, -1); // back
+//     vec3 c_1 = vec3(-0.4, 0.2, -0.7); // top
+    a = vec3(-0.50, -0.4, -0.6);
+    b = vec3(-0.75, -0.4, -0.8);
+    c = vec3(-0.75, -0.5, -0.8);
+    d = vec3(-0.50, -0.5, -0.6);
+    objects.push_back(new rectangle(a, b, c, d, white, new area_light(white)));
+
 }
 
 /**
@@ -336,10 +361,10 @@ int main(int argc, char* argv[]) {
     srand(time(NULL));
     set_command_line_args(argc, argv);
 
-    generate_checkerboard(-0.5, yellow, orange);
+    generate_checkerboard(-0.5, light_gray, dark_gray);
     add_objects();
     // add_random_spheres();
-    add_area_lights();
+    // add_area_lights();
     root = bvh_node(objects);
 
     // create_mesh();
