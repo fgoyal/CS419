@@ -170,7 +170,6 @@ void triangle::set_vertex_normals(const vec3& x, const vec3& y, const vec3& z) {
  */
 vec3 triangle::barycentric_coordinates(const point3 position) const {
     double T = area(a, b, c);
-    // cerr << T << "\n";
     double b1 = area(position, b, c) / T;
     double b2 = area(a, position, c) / T;
     double b3 = area(a, b, position) / T;

@@ -43,52 +43,23 @@ color bvh_node::kDiffuse() const {
  * This function should never be used
  */
 vec3 bvh_node::surface_normal(const point3 position) const {
-    // std::cerr << "bvh node surface normal\n";
     return vec3(-10.0,-10.0,-10.0);
 }
 
 
 bool bvh_node::ray_intersection(const ray& r, hit_record& rec, double tmin, double tmax) const {
-    // cerr << "intersection " << tmin << " " << tmax << "\n";
-    // cerr << "box: " << bbox << "\n";
     if (!bbox.ray_intersection(r, tmin, tmax)) {
-        // cerr << "no intersection\n";
         return false;
     }
-    // cerr << "\n";
-    // cerr << "left ";
+    
     double hit_left = left->ray_intersection(r, rec, tmin, tmax);
     double hit_right = right->ray_intersection(r, rec, tmin, hit_left ? rec.t : tmax);
-    // cerr << "right ";
-    // double hit_right = right->ray_intersection(r, rec, tmin, tmax);
     return hit_left || hit_right;
 }
 
 
 aabb bvh_node::bounding_box() const {
     return bbox;
-}
-
-/**
- * Comparator for bounding boxes, compares the centroid of each box based on the given axis
- */
-inline bool box_compare(const objs* a, const objs* b, int axis) {
-    aabb box_a = a->bounding_box();
-    aabb box_b = b->bounding_box();
-
-    return box_a.centroid()[axis] < box_b.centroid()[axis];
-}
-
-bool box_x_compare(const objs* a, const objs* b) {
-    return box_compare(a, b, 0);
-}
-
-bool box_y_compare(const objs* a, const objs* b) {
-    return box_compare(a, b, 1);
-}
-
-bool box_z_compare(const objs* a, const objs* b) {
-    return box_compare(a, b, 2);
 }
 
 /**
@@ -100,7 +71,6 @@ bool box_z_compare(const objs* a, const objs* b) {
  * @param end: the ending index of objects to look at
  */
 bvh_node::bvh_node(const vector<objs*>& objects) {
-    // cerr << "\nnew node: " << objects.size() << "\n";
     vector<objs*> objs_list = objects;
     if (objs_list.size() == 0) {
         return;
@@ -147,20 +117,19 @@ bvh_node::bvh_node(const vector<objs*>& objects) {
             range = zrange;
         }
 
+        // sort objects based on median split
         auto median_split = (max[axis] + min[axis]) / 2;
         vector<objs*> left_split;
         vector<objs*> right_split;
-        // cerr << "median: " << median_split << "\n";
         for (int o = 0; o < objs_list.size(); o++) {
             double curr = objs_list[o]->bounding_box().centroid()[axis];
-            // cerr << "curr: " << curr << "\n";
             if (curr >= median_split) {
                 right_split.push_back(objs_list[o]);
             } else {
                 left_split.push_back(objs_list[o]);
             }
         }
-        // cerr << "left size: " << left_split.size() << " right size: " << right_split.size() << "\n";
+
         if (left_split.size() == 1) {
             left = left_split[0];
         } else {
@@ -172,19 +141,12 @@ bvh_node::bvh_node(const vector<objs*>& objects) {
         } else {
             right = new bvh_node(right_split);
         }
-        // cerr << "num left objects: " << left_split.size() << "\n";
-        // cerr << "num right objects: " << right_split.size() << "\n";
     }
 
-    
-
     aabb box_left = left->bounding_box();
-    // cerr << "left - " << box_left << "\n";
     aabb box_right = right->bounding_box();
-    // cerr << "right - " << box_right << "\n";
     
     bbox = surrounding_box(box_left, box_right);
-    // cerr << "surrounding - " << bbox << "\n\n";
 }
 
 #endif

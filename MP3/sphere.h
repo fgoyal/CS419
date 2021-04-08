@@ -57,10 +57,6 @@ class sphere : public objs {
         material* m;
 };
 
-// color sphere::kDiffuse() const {
-//     return kD;
-// }
-
 vec3 sphere::surface_normal(const point3 position) const {
     return unit_vector(position - c);
 }
@@ -90,7 +86,6 @@ bool sphere::ray_intersection(const ray& r, hit_record& rec, double tmin, double
     rec.kD = kD;
     rec.mat = m;
     return true;
-    // return (root >= 0.0);
 }
 
 aabb sphere::create_aabb() const {

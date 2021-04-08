@@ -1,7 +1,7 @@
-## Accelerated Ray Tracing
-A ray tracer that uses Bounding Volume Hierarchy to speed up the rendering process.
+## Whitted Ray Tracing
+A ray tracer that includes mirror-like objects, transparent objects, and area lights
 
 ### Sources
-The following code was sourced from [Ray Tracing in The Next Week](https://raytracing.github.io/books/RayTracingTheNextWeek.html)  by Peter Shirley:
-- The structure for `aabb.h`
-- `ray_intersection()` and `box_compare` in `bvh_node.h`
+1. `material.h` - [Ray Tracing in one Weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.html#diffusematerials)
+    * code for `scatter()` function for all materials, slightly modified
+3. `vec3.h` `refract()` - [Ray Tracing in one Weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.html#dielectrics/refraction)

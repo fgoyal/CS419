@@ -29,7 +29,6 @@ class mesh {
         vector<vec3*> vertices;
         vector<objs*> faces;
         vector<vec3*> indices;
-        // vector<objs*> normals;
 };
 
 /**
@@ -47,13 +46,11 @@ mesh::mesh(const string filename, const color& kDiffuse, material* m) {
     while (file >> a >> x >> y >> z) {
         if (a == 'v') {
             vertices.push_back(new vec3(x, y, z));
-            // print('v', vertices)
         }
         if (a == 'f') {
             triangle* t = new triangle(*vertices[x - 1], *vertices[y - 1], *vertices[z - 1], kDiffuse, m);
             faces.push_back(t);
             indices.push_back(new vec3(x - 1, y - 1, z - 1));
-            // print('f', indices)
         }
         i++;
     }

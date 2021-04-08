@@ -32,14 +32,14 @@ using std::numeric_limits;
 // --------------------------------------- VARIABLES --------------------------------------- //
 static bool perspective = false;
 static bool jittering = false;
-static const int fine_grid = 225;
+static const int fine_grid = 400;
 static int coarse_grid = (int) sqrt(fine_grid);
 const int max_depth = 50;
 double infinity = numeric_limits<double>::infinity();
 
 // Image
 const static double aspect_ratio = 1.0 / 1.0;
-const static int image_width = 500;
+const static int image_width = 400;
 const static int image_height = static_cast<int>(image_width / aspect_ratio);
 
 // Camera
@@ -64,7 +64,7 @@ const color yellow      = color(255, 247, 163) / 255.0;
 const color sky         = color(173, 225, 255) / 255.0;
 const color black       = color(0.0, 0.0, 0.0);
 const color dark_gray   = color(0.2, 0.2, 0.2);
-const color light_gray  = color(0.8, 0.8, 0.8);
+const color light_gray  = color(0.9, 0.9, 0.9);
 const color white       = color(1.0, 1.0, 1.0);
 
 // Objects
@@ -169,8 +169,8 @@ color ray_color(const ray& r, int depth) {
         // to_return = apply_shadows(to_return, rec);
         return to_return;
     }  
-    return sky;
-    // return dark_gray;
+    // return sky;
+    return dark_gray;
 }
 
 /**
@@ -237,16 +237,14 @@ color shoot_multiple_rays(int i, int j) {
  * Add the spheres, triangle, and plane into a list of objs
  */
 void add_objects() {
-    // scene 1
     vec3 a_1 = vec3(-0.3, -0.6, -0.5); // front
     vec3 b_1 = vec3(-0.8, -0.6, -1); // back
     vec3 c_1 = vec3(-0.4, 0.2, -0.7); // top
-    objects.push_back(new triangle(a_1, b_1, c_1, blue, new mirror(0.05)));
+    objects.push_back(new triangle(a_1, b_1, c_1, blue, new lambertian()));
     objects.push_back(new sphere(point3(-0.2, -0.3,   -1), 0.3,  light_gray, new mirror(0.05)));
     objects.push_back(new sphere(point3( 0.4, -0.3,   -1), 0.2,  white, new glass(1.5)));
     objects.push_back(new sphere(point3( 0.8, -0.3,   -1.5), 0.1,  orange, new lambertian()));
     objects.push_back(new sphere(point3( 0.3, -0.43, -0.7), 0.07, pink, new lambertian()));
-    // objects.push_back(new plane(point3(0, -0.5,0), vec3(0, -1, 0), white, new lambertian()));
 }
 
 /**
@@ -264,7 +262,7 @@ void add_random_spheres() {
 /**
  * Add area lights to scene
  */
-void add_area_lights() {
+void add_area_lights1() {
     double bottom = -0.5;
     double top = 1;
     double back = -1.5;
@@ -292,9 +290,6 @@ void add_area_lights() {
     d = vec3(right + space, bottom, back); // bottom left
     objects.push_back(new rectangle(a, b, c, d, white, new area_light(white)));
 
-// vec3 a_1 = vec3(-0.3, -0.8, -0.5); // front
-//     vec3 b_1 = vec3(-0.8, -0.6, -1); // back
-//     vec3 c_1 = vec3(-0.4, 0.2, -0.7); // top
     a = vec3(-0.50, -0.4, -0.6);
     b = vec3(-0.75, -0.4, -0.8);
     c = vec3(-0.75, -0.5, -0.8);
@@ -304,7 +299,23 @@ void add_area_lights() {
 }
 
 /**
- * Add mesh of triangles to simulate checkboard plane
+ * Add area lights to scene
+ */
+void add_area_lights2() {
+    double x[3] = {-0.8, 0.2, 0.8};
+    vec3 a, b, c, d;
+    for (int i = 0; i < 3; i++) {
+        a = vec3(x[i], -0.35, -1.4);
+        b = vec3(x[i], -0.35, -0.6);
+        c = vec3(x[i], -0.6, -0.6);
+        d = vec3(x[i], -0.6, -1.4);
+        objects.push_back(new rectangle(a, b, c, d, white, new area_light(white)));
+    }
+
+    objects.push_back(new sphere(vec3(0, 0.5, -1), 0.25, white, new area_light(white)));
+}
+/**
+ * Add mesh of triangles to simulate checkerboard plane
  */
 void generate_checkerboard(double y, color color_a, color color_b) {
     vec3 a;
@@ -364,7 +375,7 @@ int main(int argc, char* argv[]) {
     generate_checkerboard(-0.5, light_gray, dark_gray);
     add_objects();
     // add_random_spheres();
-    // add_area_lights();
+    add_area_lights2();
     root = bvh_node(objects);
 
     // create_mesh();

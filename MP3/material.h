@@ -3,17 +3,34 @@
 
 struct hit_record; 
 
+/**
+ * Abstract class for material
+ */
 class material {
     public:
+        /**
+         * Produces a scattered ray
+         * @param r: the ray being shot at the material
+         * @param rec: hit record storing the intersection results
+         * @param scattered: holds the calculated scattered ray
+         * @return true if ray is scattered, false otherwise
+         */
         virtual bool scatter(
             const ray& r, const hit_record& rec, ray& scattered
         ) const = 0;
 
+        /**
+         * determines what color light the material emits
+         * @return the color emitted
+         */
         virtual color emitted() const {
             return color(0, 0, 0);
         }
 };
 
+/**
+ * Class for diffuse/lambertian objects
+ */
 class lambertian : public material {
     public: 
         virtual bool scatter(const ray& r, const hit_record& rec, ray& scattered) const override {
@@ -26,6 +43,9 @@ class lambertian : public material {
         }
 };
 
+/**
+ * Class for objects that are reflective or mirror-like
+ */
 class mirror : public material {
     public: 
         mirror(double f) : fuzz(f < 1 ? f : 1) {}
@@ -38,6 +58,9 @@ class mirror : public material {
         double fuzz;
 };
 
+/**
+ * Class for objects that are transparent or glass-like
+ */
 class glass : public material {
     public: 
         glass(double index) : ior(index) {}
@@ -69,6 +92,9 @@ class glass : public material {
         double ior;
     
     private: 
+        /**
+         * Schlick's approximation for reflectance
+         */
         static double reflectance(double cosine, double ref_idx) {
             auto r0 = (1 - ref_idx) / (1 + ref_idx);
             r0 = r0 * r0;
@@ -76,9 +102,12 @@ class glass : public material {
         }
 };
 
+/**
+ * Class for area lights aka objects that emit their own light
+ */
 class area_light : public material {
     public: 
-        area_light(color emit_color) : c(emit_color) {}
+        area_light(const color& emit) : c(emit) {}
         virtual bool scatter(const ray& r, const hit_record& rec, ray& scattered) const override{
             return false;
         }

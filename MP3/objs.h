@@ -25,6 +25,7 @@ struct hit_record {
     /** the kDiffuse component for the given object */
     color kD;
 
+    /** the material of the given given */
     material* mat;
 
     /**
@@ -68,6 +69,9 @@ class objs {
          **/
         virtual aabb bounding_box() const = 0;
 
+        /**
+         * @return a string saying the type of object it is
+         */
         virtual std::string type() const = 0;
 };
 
